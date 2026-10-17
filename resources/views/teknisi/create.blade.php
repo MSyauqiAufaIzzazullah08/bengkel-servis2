@@ -47,6 +47,25 @@
             <form action="/teknisi" method="POST">
                 @csrf
 
+                @if (session('role_id') == 1)
+    <div class="form-group">
+        <label class="form-label" for="cabang_id">
+            Cabang Teknisi <span style="color:red">*</span>
+        </label>
+
+        <select id="cabang_id" name="cabang_id" class="form-control" required>
+            <option value="">-- Pilih Cabang --</option>
+
+            @foreach ($cabang as $item)
+                <option value="{{ $item->id_cabang }}"
+                    {{ old('cabang_id') == $item->id_cabang ? 'selected' : '' }}>
+                    {{ $item->nama_cabang }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+@endif
+
                 <div class="form-group">
                     <label class="form-label" for="user_id">User Akun <span style="color:red">*</span></label>
                     <select id="user_id" name="user_id" class="form-control" required>

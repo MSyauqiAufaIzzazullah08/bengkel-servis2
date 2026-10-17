@@ -2,47 +2,134 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cabang;
 use App\Models\Teknisi;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TeknisiController extends Controller
 {
+    private function cabangAdmin()
+    {
+        if ((int) session('role_id') !== 2) {
+            return null;
+        }
+
+        $user = User::findOrFail(session('user_id'));
+
+        $cabangId = $user->cabang_id
+            ?? $user->adminCabang?->cabang_id;
+
+        abort_if(
+            !$cabangId,
+            403,
+            'Akun Admin Cabang belum terhubung dengan cabang.'
+        );
+
+        return (int) $cabangId;
+    }
+
+    private function queryTeknisi()
+    {
+        $query = Teknisi::with([
+            'user',
+            'penugasanTeknisi.bookingServis',
+        ]);
+
+        $cabangId = $this->cabangAdmin();
+
+        if ($cabangId !== null) {
+            $query->whereHas('user', function ($user) use ($cabangId) {
+                $user->where('cabang_id', $cabangId);
+            });
+        }
+
+        return $query;
+    }
+
+    private function queryUserTeknisi()
+    {
+        $query = User::where('role_id', 4);
+
+        $cabangId = $this->cabangAdmin();
+
+        if ($cabangId !== null) {
+            $query->where('cabang_id', $cabangId);
+        }
+
+        return $query->orderBy('nama');
+    }
+
     public function index()
     {
-        $teknisi = Teknisi::with([
-            'user',
-            'penugasanTeknisi.bookingServis'
-        ])->get();
+        $teknisi = $this->queryTeknisi()->get();
 
         return view('teknisi.index', compact('teknisi'));
     }
 
     public function create()
     {
-        $users = User::where('role_id', 4)
-            ->orderBy('nama')
-            ->get();
+        $users = $this->queryUserTeknisi()->get();
 
-        return view('teknisi.create', compact('users'));
+        $cabang = collect();
+
+        if ((int) session('role_id') === 1) {
+            $cabang = Cabang::orderBy('nama_cabang')->get();
+        }
+
+        return view('teknisi.create', compact('users', 'cabang'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:User,id_user|unique:Teknisi,user_id',
+        $isSuperAdmin = (int) session('role_id') === 1;
+
+        $rules = [
+            'user_id' => [
+                'required',
+                'exists:User,id_user',
+                'unique:Teknisi,user_id',
+            ],
             'nama' => 'required|string|max:100',
-            'no_hp' => 'required|string|max:20',
+            'no_hp' => 'required|string|max:25',
             'keahlian' => 'required|string|max:255',
             'status' => 'required|string|max:50',
-        ]);
+        ];
+
+        if ($isSuperAdmin) {
+            $rules['cabang_id'] = [
+                'required',
+                'exists:cabang,id_cabang',
+            ];
+        }
+
+        $validated = $request->validate($rules);
+
+        $userQuery = User::where('id_user', $validated['user_id'])
+            ->where('role_id', 4);
+
+        if (!$isSuperAdmin) {
+            $cabangId = $this->cabangAdmin();
+
+            abort_if($cabangId === null, 403);
+
+            $userQuery->where('cabang_id', $cabangId);
+        }
+
+        $user = $userQuery->firstOrFail();
+
+        if ($isSuperAdmin) {
+            $user->cabang_id = $validated['cabang_id'];
+            $user->save();
+        }
 
         Teknisi::create([
-            'user_id' => $request->user_id,
-            'nama' => $request->nama,
-            'no_hp' => $request->no_hp,
-            'keahlian' => $request->keahlian,
-            'status' => $request->status,
+            'user_id' => $user->id_user,
+            'nama' => $validated['nama'],
+            'no_hp' => $validated['no_hp'],
+            'keahlian' => $validated['keahlian'],
+            'status' => $validated['status'],
         ]);
 
         return redirect('/teknisi')
@@ -51,36 +138,73 @@ class TeknisiController extends Controller
 
     public function edit($id)
     {
-        $teknisi = Teknisi::findOrFail($id);
+        $teknisi = $this->queryTeknisi()->findOrFail($id);
+        $users = $this->queryUserTeknisi()->get();
 
-        $users = User::where('role_id', 4)
-            ->orderBy('nama')
-            ->get();
+        $cabang = collect();
+
+        if ((int) session('role_id') === 1) {
+            $cabang = Cabang::orderBy('nama_cabang')->get();
+        }
 
         return view('teknisi.edit', compact(
             'teknisi',
-            'users'
+            'users',
+            'cabang'
         ));
     }
 
     public function update(Request $request, $id)
     {
-        $teknisi = Teknisi::findOrFail($id);
+        $teknisi = $this->queryTeknisi()->findOrFail($id);
+        $isSuperAdmin = (int) session('role_id') === 1;
 
-        $request->validate([
-            'user_id' => 'required|exists:User,id_user|unique:Teknisi,user_id,' . $id . ',id_teknisi',
+        $rules = [
+            'user_id' => [
+                'required',
+                'exists:User,id_user',
+                Rule::unique('Teknisi', 'user_id')
+                    ->ignore($id, 'id_teknisi'),
+            ],
             'nama' => 'required|string|max:100',
-            'no_hp' => 'required|string|max:20',
+            'no_hp' => 'required|string|max:25',
             'keahlian' => 'required|string|max:255',
             'status' => 'required|string|max:50',
-        ]);
+        ];
+
+        if ($isSuperAdmin) {
+            $rules['cabang_id'] = [
+                'required',
+                'exists:cabang,id_cabang',
+            ];
+        }
+
+        $validated = $request->validate($rules);
+
+        $userQuery = User::where('id_user', $validated['user_id'])
+            ->where('role_id', 4);
+
+        if (!$isSuperAdmin) {
+            $cabangId = $this->cabangAdmin();
+
+            abort_if($cabangId === null, 403);
+
+            $userQuery->where('cabang_id', $cabangId);
+        }
+
+        $user = $userQuery->firstOrFail();
+
+        if ($isSuperAdmin) {
+            $user->cabang_id = $validated['cabang_id'];
+            $user->save();
+        }
 
         $teknisi->update([
-            'user_id' => $request->user_id,
-            'nama' => $request->nama,
-            'no_hp' => $request->no_hp,
-            'keahlian' => $request->keahlian,
-            'status' => $request->status,
+            'user_id' => $user->id_user,
+            'nama' => $validated['nama'],
+            'no_hp' => $validated['no_hp'],
+            'keahlian' => $validated['keahlian'],
+            'status' => $validated['status'],
         ]);
 
         return redirect('/teknisi')
@@ -89,7 +213,7 @@ class TeknisiController extends Controller
 
     public function destroy($id)
     {
-        $teknisi = Teknisi::findOrFail($id);
+        $teknisi = $this->queryTeknisi()->findOrFail($id);
 
         if ($teknisi->penugasanTeknisi()->exists()) {
             return redirect('/teknisi')

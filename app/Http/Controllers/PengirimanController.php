@@ -6,6 +6,7 @@ use App\Models\Pengiriman;
 use App\Models\OrderSparePart;
 use App\Models\Ekspedisi;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PengirimanController extends Controller
 {
@@ -32,27 +33,24 @@ class PengirimanController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'id_order' => 'required',
-            'id_ekspedisi' => 'required',
-            'kurir' => 'required',
-            'no_resi' => 'required',
-            'status' => 'required',
+        $validated = $request->validate([
+            'id_order' => 'required|exists:ordersparepart,id_order',
+            'id_ekspedisi' => 'required|exists:ekspedisi,id_ekspedisi',
+            'kurir' => 'required|string|max:255',
+            'no_resi' => 'required|string|max:255',
+            'status' => 'required|in:Pending,Dikirim,Tiba',
             'estimasi_tiba' => 'nullable|date',
             'tanggal_kirim' => 'nullable|date',
         ]);
 
-        Pengiriman::create([
-            'id_order' => $request->id_order,
-            'id_ekspedisi' => $request->id_ekspedisi,
-            'kurir' => $request->kurir,
-            'no_resi' => $request->no_resi,
-            'status' => $request->status,
-            'estimasi_tiba' => $request->estimasi_tiba,
-            'tanggal_kirim' => $request->tanggal_kirim,
-        ]);
+        DB::transaction(function () use ($validated) {
+            $pengiriman = Pengiriman::create($validated);
 
-        return redirect('/pengiriman')->with('success', 'Data berhasil disimpan.');
+            $this->sinkronkanStatusPesanan($pengiriman);
+        });
+
+        return redirect('/pengiriman')
+            ->with('success', 'Data pengiriman berhasil disimpan.');
     }
 
     public function edit($id)
@@ -69,39 +67,40 @@ class PengirimanController extends Controller
         ));
     }
 
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'id_order' => 'required',
-            'id_ekspedisi' => 'required',
-            'kurir' => 'required',
-            'no_resi' => 'required',
-            'status' => 'required',
-            'estimasi_tiba' => 'nullable|date',
-            'tanggal_kirim' => 'nullable|date',
-        ]);
+    
 
+public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'id_order' => 'required|exists:ordersparepart,id_order',
+        'id_ekspedisi' => 'required|exists:ekspedisi,id_ekspedisi',
+        'kurir' => 'required|string|max:255',
+        'no_resi' => 'required|string|max:255',
+        'status' => 'required|in:Pending,Dikirim,Tiba,pending,dikirim,tiba',
+        'estimasi_tiba' => 'nullable|date',
+        'tanggal_kirim' => 'nullable|date',
+    ]);
+
+    DB::transaction(function () use ($validated, $id) {
         $pengiriman = Pengiriman::findOrFail($id);
 
-        $pengiriman->update([
-            'id_order' => $request->id_order,
-            'id_ekspedisi' => $request->id_ekspedisi,
-            'kurir' => $request->kurir,
-            'no_resi' => $request->no_resi,
-            'status' => $request->status,
-            'estimasi_tiba' => $request->estimasi_tiba,
-            'tanggal_kirim' => $request->tanggal_kirim,
-        ]);
+        $statusPengiriman = strtolower(trim($validated['status']));
 
-        return redirect('/pengiriman')->with('success', 'Data berhasil diubah.');
-    }
+        $statusPesanan = match ($statusPengiriman) {
+            'pending' => 'Diproses',
+            'dikirim' => 'Dikirim',
+            'tiba' => 'Selesai',
+        };
 
-    public function destroy($id)
-    {
-        $pengiriman = Pengiriman::findOrFail($id);
+        $pengiriman->update($validated);
 
-        $pengiriman->delete();
+        DB::table('ordersparepart')
+            ->where('id_order', $validated['id_order'])
+            ->update(['status' => $statusPesanan]);
+    });
 
-        return redirect('/pengiriman')->with('success', 'Data berhasil dihapus.');
-    }
+    return redirect('/pengiriman')
+        ->with('success', 'Status pengiriman dan pesanan berhasil diperbarui.');
+}
+
 }

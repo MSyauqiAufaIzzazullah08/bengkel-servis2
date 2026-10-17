@@ -1,24 +1,9 @@
-<!DOCTYPE html>
-{{--
-    resources/views/layouts/app.blade.php
-    Layout utama BengkelServis — desain navy-beige.
-
-    Variabel $namaUser, $inisial, $namaRole disediakan oleh
-    View::composer di AppServiceProvider (membaca dari session).
-    $pathAktif dihitung di @php block di dalam sidebar.
-
-    Cara pakai di halaman child:
-        @extends('layouts.app')
-        @section('title', 'Judul Halaman')
-        @section('breadcrumb') ... @endsection   (opsional)
-        @section('content') ... @endsection
-        @section('scripts') ... @endsection      (opsional)
---}}
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'BengkelServis') — BengkelServis</title>
+    <title>@yield('title', 'BengkelServis') â€” BengkelServis</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -53,8 +38,313 @@
         @endphp
 
         <nav class="sidebar-nav" id="sidebarNav">
+            
+@if ((int) session('role_id') === 5)
+    {{-- SIDEBAR KHUSUS MONTIR LAPANGAN --}}
 
-            <div class="nav-section-title">Menu Utama</div>
+    <div class="nav-section-title">Menu Utama</div>
+
+    <div class="nav-item">
+        <a href="/dashboard-montir-lapangan"
+           class="nav-link {{ request()->is('dashboard-montir-lapangan') ? 'active' : '' }}"
+           data-tooltip="Dashboard">
+            <span class="nav-icon">
+                <i class="fas fa-home"></i>
+            </span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+    </div>
+
+    
+<div class="nav-item">
+    <a href="{{ route('montir-lapangan.tugas.index') }}"#tugas-home-service"
+       class="nav-link"
+       data-tooltip="Tugas Home Service">
+        <span class="nav-icon">
+            <i class="fas fa-tools"></i>
+        </span>
+        <span class="nav-text">Tugas Home Service</span>
+    </a>
+</div>
+
+
+@elseif ((int) session('role_id') === 3)
+
+
+
+                {{-- SIDEBAR KHUSUS PETUGAS SERVICE --}}
+                                {{-- DASHBOARD KHUSUS PETUGAS SERVICE --}}
+                <div class="nav-item">
+                    <a href="/dashboard-petugas-service"
+                       class="nav-link {{ request()->is('dashboard-petugas-service') ? 'active' : '' }}"
+                       data-tooltip="Dashboard">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+<div class="nav-section-title">Menu Utama</div>
+
+                <div class="nav-item">
+                    <a href="/pengelolaan-booking"
+                       class="nav-link {{ request()->is('pengelolaan-booking*') || request()->is('booking') ? 'active' : '' }}"
+                       data-tooltip="Booking Servis">
+                        <span class="nav-icon"><i class="fas fa-calendar-check"></i></span>
+                        <span class="nav-text">Booking Servis</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/layanan"
+                       class="nav-link {{ request()->is('layanan') || request()->is('layanan/*') ? 'active' : '' }}"
+                       data-tooltip="Layanan Servis">
+                        <span class="nav-icon"><i class="fas fa-tools"></i></span>
+                        <span class="nav-text">Layanan Servis</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/detailservis"
+                       class="nav-link {{ request()->is('detailservis*') ? 'active' : '' }}"
+                       data-tooltip="Detail Servis">
+                        <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
+                        <span class="nav-text">Detail Servis</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Data Pelanggan &amp; Kendaraan</div>
+
+                <div class="nav-item">
+                    <a href="/pelanggan"
+                       class="nav-link {{ request()->is('pelanggan*') ? 'active' : '' }}"
+                       data-tooltip="Data Pelanggan">
+                        <span class="nav-icon"><i class="fas fa-users"></i></span>
+                        <span class="nav-text">Data Pelanggan</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/kendaraan"
+                       class="nav-link {{ request()->is('kendaraan*') ? 'active' : '' }}"
+                       data-tooltip="Data Kendaraan">
+                        <span class="nav-icon"><i class="fas fa-car"></i></span>
+                        <span class="nav-text">Data Kendaraan</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/penugasan"
+                       class="nav-link {{ request()->is('penugasan*') ? 'active' : '' }}"
+                       data-tooltip="Penugasan Teknisi">
+                        <span class="nav-icon"><i class="fas fa-user-check"></i></span>
+                        <span class="nav-text">Penugasan Teknisi</span>
+                    </a>
+                </div>
+            
+                <div class="nav-item">
+    
+                <div class="nav-item">
+                    <a href="/pembayaran"
+                       class="nav-link {{ request()->is('pembayaran*') && !request()->is('pembayaran-home-service*') ? 'active' : '' }}"
+                       data-tooltip="Pembayaran">
+                        <span class="nav-icon"><i class="fas fa-credit-card"></i></span>
+                        <span class="nav-text">Pembayaran</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="{{ url('/pembayaran-home-service') }}"
+                       class="nav-link {{ request()->is('pembayaran-home-service*') ? 'active' : '' }}"
+                       data-tooltip="Pembayaran Home Service">
+                        <span class="nav-icon"><i class="fas fa-house-user"></i></span>
+                        <span class="nav-text">Pembayaran Home Service</span>
+                    </a>
+                </div>
+
+            @elseif ((int) session('role_id') === 2)
+                {{-- SIDEBAR KHUSUS ADMIN CABANG --}}
+                <div class="nav-item">
+                    <a href="/dashboard-admin-cabang"
+                       class="nav-link {{ request()->is('dashboard-admin-cabang') ? 'active' : '' }}"
+                       data-tooltip="Dashboard">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Menu Utama</div>
+
+<div class="nav-item">
+    <a href="/pengelolaan-booking"
+       class="nav-link {{ request()->is('pengelolaan-booking*') ? 'active' : '' }}"
+       data-tooltip="Booking Servis">
+        <span class="nav-icon"><i class="fas fa-calendar-check"></i></span>
+        <span class="nav-text">Booking Servis</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="/layanan"
+       class="nav-link {{ request()->is('layanan*') ? 'active' : '' }}"
+       data-tooltip="Layanan Servis">
+        <span class="nav-icon"><i class="fas fa-tools"></i></span>
+        <span class="nav-text">Layanan Servis</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="/detailservis"
+       class="nav-link {{ request()->is('detailservis*') ? 'active' : '' }}"
+       data-tooltip="Detail Servis">
+        <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
+        <span class="nav-text">Detail Servis</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="/pelanggan"
+       class="nav-link {{ request()->is('pelanggan*') ? 'active' : '' }}"
+       data-tooltip="Data Pelanggan">
+        <span class="nav-icon"><i class="fas fa-users"></i></span>
+        <span class="nav-text">Data Pelanggan</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="/kendaraan"
+       class="nav-link {{ request()->is('kendaraan*') ? 'active' : '' }}"
+       data-tooltip="Data Kendaraan">
+        <span class="nav-icon"><i class="fas fa-car"></i></span>
+        <span class="nav-text">Data Kendaraan</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="/penugasan"
+       class="nav-link {{ request()->is('penugasan*') ? 'active' : '' }}"
+       data-tooltip="Penugasan Teknisi">
+        <span class="nav-icon"><i class="fas fa-user-check"></i></span>
+        <span class="nav-text">Penugasan Teknisi</span>
+    </a>
+</div>
+
+
+            @elseif ((int) session('role_id') === 4)
+                {{-- SIDEBAR KHUSUS TEKNISI --}}
+                <div class="nav-item">
+                    <a href="/dashboard-teknisi"
+                       class="nav-link {{ request()->is('dashboard-teknisi') ? 'active' : '' }}"
+                       data-tooltip="Dashboard Teknisi">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Pekerjaan</div>
+
+                <div class="nav-item">
+                    <a href="/dashboard-teknisi"
+                       class="nav-link {{ request()->is('dashboard-teknisi') ? 'active' : '' }}"
+                       data-tooltip="Pekerjaan Saya">
+                        <span class="nav-icon"><i class="fas fa-tools"></i></span>
+                        <span class="nav-text">Pekerjaan Saya</span>
+                    </a>
+                </div>
+
+                
+                <div class="nav-item">
+                    <a href="/teknisi/rating"
+                       class="nav-link {{ request()->is('teknisi/rating') ? 'active' : '' }}"
+                       data-tooltip="Rating & Ulasan">
+                        <span class="nav-icon"><i class="fas fa-star"></i></span>
+                        <span class="nav-text">Rating & Ulasan</span>
+                    </a>
+                </div>
+
+
+            @elseif ((int) session('role_id') === 9)
+                {{-- SIDEBAR KHUSUS PETUGAS SPARE PART --}}
+                <div class="nav-section-title">Menu Utama</div>
+
+                <div class="nav-item">
+                    <a href="/dashboard-petugas-sparepart"
+                       class="nav-link {{ request()->is('dashboard-petugas-sparepart') ? 'active' : '' }}"
+                       data-tooltip="Dashboard">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Inventaris</div>
+
+                <div class="nav-item">
+                    <a href="/sparepart"
+                       class="nav-link {{ request()->is('sparepart*') ? 'active' : '' }}"
+                       data-tooltip="Stok Spare Part">
+                        <span class="nav-icon"><i class="fas fa-boxes"></i></span>
+                        <span class="nav-text">Stok Spare Part</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/kategori-sparepart"
+                       class="nav-link {{ request()->is('kategori-sparepart*') ? 'active' : '' }}"
+                       data-tooltip="Kategori Spare Part">
+                        <span class="nav-icon"><i class="fas fa-tags"></i></span>
+                        <span class="nav-text">Kategori Spare Part</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Pesanan</div>
+
+                <div class="nav-item">
+                    <a href="/admin-pesanan-sparepart"
+                       class="nav-link {{ request()->is('admin-pesanan-sparepart*') ? 'active' : '' }}"
+                       data-tooltip="Kelola Pesanan">
+                        <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
+                        <span class="nav-text">Kelola Pesanan</span>
+                    </a>
+                </div>
+
+            @elseif ((int) session('role_id') === 10)
+                {{-- SIDEBAR KHUSUS PETUGAS PENGIRIMAN --}}
+                <div class="nav-section-title">Menu Utama</div>
+
+                <div class="nav-item">
+                    <a href="/dashboard-petugas-pengiriman"
+                       class="nav-link {{ request()->is('dashboard-petugas-pengiriman') ? 'active' : '' }}"
+                       data-tooltip="Dashboard">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Logistik</div>
+
+                <div class="nav-item">
+                    <a href="/pengiriman"
+                       class="nav-link {{ request()->is('pengiriman*') ? 'active' : '' }}"
+                       data-tooltip="Pengiriman">
+                        <span class="nav-icon"><i class="fas fa-truck"></i></span>
+                        <span class="nav-text">Pengiriman</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/ekspedisi"
+                       class="nav-link {{ request()->is('ekspedisi*') ? 'active' : '' }}"
+                       data-tooltip="Ekspedisi">
+                        <span class="nav-icon"><i class="fas fa-shipping-fast"></i></span>
+                        <span class="nav-text">Ekspedisi</span>
+                    </a>
+                </div>
+
+
+            @else
+
+
+
+                        
+<div class="nav-section-title">Menu Utama</div>
             <div class="nav-item">
                 <a href="/dashboard"
                    class="nav-link {{ $pathAktif === 'dashboard' ? 'active' : '' }}"
@@ -63,8 +353,7 @@
                     <span class="nav-text">Dashboard</span>
                 </a>
             </div>
-
-            <div class="nav-section-title">Manajemen Cabang</div>
+             <div class="nav-section-title">Manajemen Cabang</div>
             <div class="nav-item">
                 <a href="/cabang"
                    class="nav-link {{ str_starts_with($pathAktif, 'cabang') ? 'active' : '' }}"
@@ -94,26 +383,29 @@
 
             <div class="nav-section-title">Manajemen Servis</div>
             <div class="nav-item">
+                @php
+                    $bookingMenuAktif = str_starts_with($pathAktif, 'booking')
+                        || str_starts_with($pathAktif, 'pengelolaan-booking');
+                @endphp
                 <a href="#"
-                   class="nav-link has-submenu {{ str_starts_with($pathAktif, 'booking') ? 'open' : '' }}"
+                   class="nav-link has-submenu {{ $bookingMenuAktif ? 'open' : '' }}"
                    data-tooltip="Booking">
                     <span class="nav-icon"><i class="fas fa-calendar-check"></i></span>
                     <span class="nav-text">Booking Servis</span>
                     <i class="fas fa-chevron-right nav-arrow"></i>
                 </a>
-                <div class="nav-submenu {{ str_starts_with($pathAktif, 'booking') ? 'open' : '' }}">
+                <div class="nav-submenu {{ $bookingMenuAktif ? 'open' : '' }}">
                     <div class="nav-item">
-                        <a href="/booking"
-                           class="nav-link {{ $pathAktif === 'booking' ? 'active' : '' }}">
+                        <a href="{{ route('pengelolaan-booking.index') }}"
+                           class="nav-link {{ request()->is('pengelolaan-booking*') ? 'active' : '' }}">
                             <span class="nav-text">Daftar Booking</span>
                         </a>
                     </div>
-                    <div class="nav-item">
-                        <a href="/booking/create"
-                           class="nav-link {{ $pathAktif === 'booking/create' ? 'active' : '' }}">
-                            <span class="nav-text">Booking Baru</span>
-                        </a>
-                    </div>
+                    {{--
+                        Menu Booking Baru sengaja tidak ditampilkan dulu karena
+                        route /booking/create belum terdaftar untuk Super Admin.
+                        Tambahkan kembali setelah route dan controller admin tersedia.
+                    --}}
                 </div>
             </div>
 
@@ -157,8 +449,7 @@
                     <span class="nav-text">Servis Panggilan</span>
                 </a>
             </div>
-
-            <div class="nav-section-title">Inventaris</div>
+             <div class="nav-section-title">Inventaris</div>
             <div class="nav-item">
                 <a href="#"
                    class="nav-link has-submenu {{ str_starts_with($pathAktif, 'sparepart') || str_starts_with($pathAktif, 'kategori-sparepart') ? 'open' : '' }}"
@@ -259,8 +550,7 @@
                     <span class="nav-text">Rating & Ulasan</span>
                 </a>
             </div>
-
-            <div class="nav-section-title">Administrasi</div>
+             <div class="nav-section-title">Administrasi</div>
             <div class="nav-item">
                 <a href="/user"
                    class="nav-link {{ str_starts_with($pathAktif, 'user') ? 'active' : '' }}"
@@ -278,7 +568,8 @@
                 </a>
             </div>
 
-        </nav>
+                    @endif
+</nav>
 
         {{-- Logout --}}
         <div class="sidebar-footer">
@@ -308,7 +599,7 @@
             <div class="header-left">
                 <button class="btn-toggle-sidebar" id="btnToggleSidebar" title="Toggle Sidebar">
                     <i class="fas fa-bars"></i>
-                </button>
+                    </button>
                 <nav class="page-breadcrumb">
                     <span>BengkelServis</span>
                     <i class="fas fa-chevron-right" style="font-size:0.65rem"></i>
@@ -359,7 +650,7 @@
     </div>
     {{-- /main-content --}}
 
-</div>
+    </div>
 {{-- /app-wrapper --}}
 
 <div class="toast-container" id="toastContainer"></div>
@@ -381,3 +672,4 @@
 
 </body>
 </html>
+

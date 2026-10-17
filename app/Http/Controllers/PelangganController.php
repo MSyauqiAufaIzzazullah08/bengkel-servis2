@@ -3,31 +3,61 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggan;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PelangganController extends Controller
 {
-    // Menampilkan semua pelanggan
+    /**
+     * Query pelanggan sesuai cabang yang sedang login.
+     */
+    private function queryPelanggan()
+    {
+        $query = Pelanggan::query();
+
+        if ((int) session('role_id') === 2) {
+            $user = User::findOrFail(session('user_id'));
+
+            $cabangId = $user->cabang_id
+                ?? $user->adminCabang?->cabang_id;
+
+            abort_if(
+                !$cabangId,
+                403,
+                'Akun Admin Cabang belum terhubung dengan cabang.'
+            );
+
+            $query->whereHas('bookingServis', function ($booking) use ($cabangId) {
+                $booking->where('id_cabang', $cabangId);
+            });
+        }
+
+        return $query;
+    }
+
+    // Menampilkan pelanggan sesuai hak akses.
     public function index()
     {
-        $pelanggan = Pelanggan::with([
-            'kendaraan',
-            'bookingServis',
-            'orderSparePart',
-            'homeServis',
-            'rating'
-        ])->get();
+        $pelanggan = $this->queryPelanggan()
+            ->with([
+                'kendaraan',
+                'bookingServis',
+                'orderSparePart',
+                'homeServis',
+                'rating',
+            ])
+            ->get();
 
         return view('pelanggan.index', compact('pelanggan'));
     }
 
-    // Menampilkan form tambah pelanggan
+    // Menampilkan form tambah pelanggan.
     public function create()
     {
         return view('pelanggan.create');
     }
 
-    // Menyimpan pelanggan baru
+    // Menyimpan pelanggan baru.
     public function store(Request $request)
     {
         $request->validate([
@@ -50,17 +80,19 @@ class PelangganController extends Controller
             ->with('success', 'Pelanggan berhasil ditambahkan.');
     }
 
-    // Menampilkan form edit pelanggan
+    // Menampilkan form edit pelanggan.
     public function edit($id)
     {
-        $pelanggan = Pelanggan::findOrFail($id);
+        $pelanggan = $this->queryPelanggan()->findOrFail($id);
 
         return view('pelanggan.edit', compact('pelanggan'));
     }
 
-    // Mengupdate pelanggan
+    // Mengupdate pelanggan.
     public function update(Request $request, $id)
     {
+        $pelanggan = $this->queryPelanggan()->findOrFail($id);
+
         $request->validate([
             'nama' => 'required|string|max:100',
             'email' => 'required|email|max:100',
@@ -68,8 +100,6 @@ class PelangganController extends Controller
             'alamat' => 'required|string|max:255',
             'tanggal_daftar' => 'required|date',
         ]);
-
-        $pelanggan = Pelanggan::findOrFail($id);
 
         $pelanggan->update([
             'nama' => $request->nama,
@@ -83,10 +113,10 @@ class PelangganController extends Controller
             ->with('success', 'Data pelanggan berhasil diubah.');
     }
 
-    // Menghapus pelanggan
+    // Menghapus pelanggan.
     public function destroy($id)
     {
-        $pelanggan = Pelanggan::findOrFail($id);
+        $pelanggan = $this->queryPelanggan()->findOrFail($id);
 
         $pelanggan->delete();
 

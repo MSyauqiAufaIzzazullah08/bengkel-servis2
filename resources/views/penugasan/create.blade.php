@@ -83,11 +83,17 @@
                     <label class="form-label" for="status">Status <span style="color:red">*</span></label>
                     <select name="status" id="status" class="form-control" required>
                         <option value="">-- Pilih Status --</option>
-                        @foreach (['ditugaskan', 'sedang dikerjakan', 'selesai'] as $s)
-                            <option value="{{ $s }}" {{ old('status') == $s ? 'selected' : '' }}>
-                                {{ ucfirst($s) }}
-                            </option>
-                        @endforeach
+                       
+@foreach ([
+    'Assigned' => 'Ditugaskan',
+    'In Progress' => 'Sedang Dikerjakan',
+    'Completed' => 'Selesai',
+] as $value => $label)
+    <option value="{{ $value }}" {{ old('status') == $value ? 'selected' : '' }}>
+        {{ $label }}
+    </option>
+@endforeach
+
                     </select>
                 </div>
 

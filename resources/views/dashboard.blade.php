@@ -1,814 +1,792 @@
 <!DOCTYPE html>
-{{--
-    dashboard.blade.php
-    Dashboard utama setelah login.
-    Integrasi: desain dari frontend Kiro + data sesi Laravel.
-
-    Pengguna yang login: session('user_nama'), session('role_id')
-    Statistik & tabel: DATA DEMONSTRASI (belum diambil dari database)
-    Sidebar: navigasi ke route Laravel yang sudah terdaftar
---}}
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard — BengkelServis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard | BengkelServis</title>
 
-    {{-- Font Awesome --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    {{-- Google Fonts --}}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    {{-- Aset CSS dari folder public/assets (disalin dari frontend Kiro) --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/main.css') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/components.css') }}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <style>
+        :root {
+            --navy: #102B55;
+            --navy-light: #173B75;
+            --orange: #F5A623;
+            --orange-light: #FFD58A;
+            --background: #F4F7FC;
+            --white: #FFFFFF;
+            --text: #172033;
+            --muted: #66758C;
+            --border: #DCE4EF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        button {
+            font-family: inherit;
+            cursor: pointer;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR - MENGIKUTI DASHBOARD AWAL */
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: 250px;
+            height: 100vh;
+            overflow-y: auto;
+            flex-shrink: 0;
+            padding: 25px 17px;
+            color: white;
+            background: linear-gradient(
+                180deg,
+                var(--navy) 0%,
+                #0B2145 100%
+            );
+            box-shadow: 4px 0 18px rgba(16,43,85,.08);
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: 800;
+            color: white;
+            margin: 0 8px 35px;
+            letter-spacing: -.5px;
+        }
+
+        .logo span {
+            color: var(--orange);
+        }
+
+        .menu-label {
+            color: var(--orange-light);
+            font-size: 10px;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            margin: 24px 10px 10px;
+        }
+
+        .menu {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .menu a {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: rgba(255,255,255,.82);
+            transition: .2s;
+        }
+
+        .menu a:hover {
+            background: rgba(255,255,255,.10);
+            color: white;
+            transform: translateX(2px);
+        }
+
+        .menu a.active {
+            background: var(--orange);
+            color: var(--navy);
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(245,166,35,.20);
+        }
+
+        .menu-icon {
+            width: 16px;
+            flex-shrink: 0;
+            text-align: center;
+        }
+
+        .logout-sidebar {
+            width: 100%;
+            margin-top: 25px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,.15);
+            border-radius: 7px;
+            background: rgba(255,255,255,.05);
+            color: white;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .logout-sidebar:hover {
+            background: var(--orange);
+            color: var(--navy);
+        }
+
+        /* KONTEN UTAMA */
+        .main {
+            flex: 1;
+            min-width: 0;
+            margin-left: 250px;
+        }
+
+        .topbar {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 10px rgba(16,43,85,.04);
+        }
+
+        .topbar strong {
+            color: var(--navy);
+            font-size: 13px;
+        }
+
+        .user-area {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .user-info strong {
+            display: block;
+            color: var(--navy);
+        }
+
+        .user-info span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .logout {
+            background: #FFF4E5;
+            color: #8A4B00;
+            border: 1px solid #FFE0AE;
+            border-radius: 7px;
+            padding: 10px 13px;
+            font-weight: bold;
+            font-size: 12px;
+            transition: .2s;
+        }
+
+        .logout:hover {
+            background: var(--orange);
+            color: var(--navy);
+        }
+
+        .content {
+            padding: 30px;
+            max-width: 1500px;
+            margin: auto;
+        }
+
+        .breadcrumb {
+            color: #8290A5;
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .heading {
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: var(--navy);
+            font-size: 27px;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--muted);
+        }
+
+        /* BANNER */
+        .hero {
+            background: linear-gradient(
+                115deg,
+                var(--navy) 0%,
+                var(--navy-light) 72%,
+                #24549A 100%
+            );
+            color: white;
+            border-radius: 15px;
+            padding: 28px;
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 10px 24px rgba(16,43,85,.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 190px;
+            height: 190px;
+            border: 30px solid rgba(245,166,35,.12);
+            border-radius: 50%;
+            right: 55px;
+            top: -95px;
+            pointer-events: none;
+        }
+
+        .hero h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: white;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero p {
+            font-size: 13px;
+            line-height: 1.8;
+            max-width: 650px;
+            color: rgba(255,255,255,.88);
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-icon {
+            font-size: 54px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* KARTU MENU */
+        .section-title {
+            color: var(--navy);
+            font-size: 19px;
+            margin-bottom: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .card {
+            display: block;
+            min-width: 0;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(16,43,85,.04);
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: var(--orange);
+            box-shadow: 0 10px 24px rgba(16,43,85,.10);
+        }
+
+        .card-icon {
+            width: 43px;
+            height: 43px;
+            border-radius: 10px;
+            background: #FFF2D9;
+            color: var(--navy);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .card h3 {
+            color: var(--navy);
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .card p {
+            font-size: 12px;
+            line-height: 1.6;
+            color: var(--muted);
+            min-height: 38px;
+        }
+
+        .card-link {
+            display: inline-block;
+            color: #A45F00;
+            font-size: 12px;
+            font-weight: bold;
+            margin-top: 13px;
+        }
+
+        .card:hover .card-link {
+            color: var(--navy);
+        }
+
+        .notice {
+            margin-top: 24px;
+            padding: 17px;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--orange);
+            background: white;
+            border-radius: 10px;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.7;
+        }
+
+        .notice strong {
+            color: var(--navy);
+        }
+
+        footer {
+            text-align: center;
+            color: #8290A5;
+            font-size: 11px;
+            padding: 25px;
+        }
+
+        @media (max-width: 1050px) {
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .main {
+                margin-left: 220px;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+                max-height: none;
+                padding: 15px;
+            }
+
+            .logo {
+                margin: 5px 8px 15px;
+            }
+
+            .menu {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .menu-label {
+                margin-top: 14px;
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .topbar {
+                padding: 15px;
+            }
+
+            .content {
+                padding: 20px 15px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero {
+                padding: 22px;
+            }
+
+            .hero-icon {
+                display: none;
+            }
+
+            h1 {
+                font-size: 23px;
+            }
+        }
+    </style>
 </head>
+
 <body>
+@php
+    $namaUser = session('user_nama', 'Pengguna');
+    $roleId = (int) session('role_id', 0);
 
-{{-- ============================================================
-     LAYOUT: app-wrapper membungkus sidebar + konten utama
-     Kelas ini didefinisikan di components.css (.app-wrapper { display:flex })
-     ============================================================ --}}
-<div class="app-wrapper" id="app">
+    $namaRole = match ($roleId) {
+        1 => 'Super Admin',
+        2 => 'Admin Cabang',
+        3 => 'Petugas Servis',
+        4 => 'Teknisi',
+        5 => 'Montir Lapangan',
+        6 => 'Pelanggan',
+        default => 'Pengguna',
+    };
 
-    {{-- ============================================================
-         SIDEBAR
-         Navigasi menuju route Laravel yang sudah terdaftar di web.php.
-         URL logout menggunakan POST + @csrf sesuai LoginController.
-         ============================================================ --}}
-    <aside class="sidebar" id="sidebar">
+    /*
+     * Struktur menu dipisahkan berdasarkan kategori.
+     * URL mengikuti route yang telah digunakan di proyek.
+     */
+    $kategoriMenu = [];
 
-        {{-- Logo / Brand --}}
-        <div class="sidebar-brand">
-            <div class="sidebar-brand-icon">
-                <i class="fas fa-wrench"></i>
-            </div>
-            <div class="sidebar-brand-text">
-                <span class="sidebar-brand-title">BengkelServis</span>
-                <span class="sidebar-brand-subtitle">Multi-Cabang</span>
-            </div>
-        </div>
+    if ($roleId === 1) {
+        $kategoriMenu = [
+            'MENU UTAMA' => [
+                ['Pengguna', '/user', 'fa-users'],
+                ['Role Pengguna', '/role', 'fa-shield-alt'],
+                ['Admin Cabang', '/admincabang', 'fa-user-tie'],
+            ],
+            'OPERASIONAL' => [
+                ['Data Cabang', '/cabang', 'fa-building'],
+                ['Operasional Cabang', '/operasional', 'fa-chart-line'],
+                ['Data Pelanggan', '/pelanggan', 'fa-users'],
+                ['Data Kendaraan', '/kendaraan', 'fa-car'],
+                ['Booking Servis', '/booking', 'fa-calendar-check'],
+                ['Layanan Servis', '/layanan', 'fa-tools'],
+                ['Detail Servis', '/detailservis', 'fa-clipboard-list'],
+                ['Penugasan Teknisi', '/penugasan', 'fa-user-gear'],
+                ['Data Teknisi', '/teknisi', 'fa-hard-hat'],
+                ['Montir Lapangan', '/montirlapangan', 'fa-screwdriver-wrench'],
+            ],
+            'INVENTARIS & TRANSAKSI' => [
+                ['Kategori Spare Part', '/kategori-sparepart', 'fa-folder'],
+                ['Data Spare Part', '/sparepart', 'fa-gears'],
+                ['Kelola Pesanan Spare Part', '/admin-pesanan-sparepart', 'fa-box-open'],
+                ['Detail Pesanan', '/orderdetail', 'fa-boxes-stacked'],
+                ['Pengiriman', '/pengiriman', 'fa-truck'],
+                ['Ekspedisi', '/ekspedisi', 'fa-truck-fast'],
+                ['Promo', '/promo', 'fa-tags'],
+                ['Metode Pembayaran', '/metodepembayaran', 'fa-credit-card'],
+                ['Data Pembayaran', '/pembayaran', 'fa-money-bill-wave'],
+                ['Rating & Ulasan', '/rating', 'fa-star'],
+            ],
+        ];
+    } elseif ($roleId === 2) {
+        $kategoriMenu = [
+            'MENU UTAMA' => [
+                ['Dashboard Cabang', '/dashboard', 'fa-house'],
+                ['Data Cabang', '/cabang', 'fa-building'],
+                ['Operasional Cabang', '/operasional', 'fa-chart-line'],
+            ],
+            'OPERASIONAL SERVIS' => [
+                ['Booking Servis', '/booking', 'fa-calendar-check'],
+                ['Layanan Servis', '/layanan', 'fa-tools'],
+                ['Detail Servis', '/detailservis', 'fa-clipboard-list'],
+                ['Data Pelanggan', '/pelanggan', 'fa-users'],
+                ['Data Kendaraan', '/kendaraan', 'fa-car'],
+                ['Data Teknisi', '/teknisi', 'fa-hard-hat'],
+            ],
+            'INVENTARIS & TRANSAKSI' => [
+                ['Spare Part', '/sparepart', 'fa-gears'],
+                ['Pesanan Spare Part', '/order', 'fa-box-open'],
+                ['Pembayaran', '/pembayaran', 'fa-credit-card'],
+                ['Rating & Ulasan', '/rating', 'fa-star'],
+            ],
+        ];
+    } elseif ($roleId === 3) {
+        $kategoriMenu = [
+            'MENU UTAMA' => [
+                ['Booking Servis', '/booking', 'fa-calendar-check'],
+                ['Layanan Servis', '/layanan', 'fa-tools'],
+                ['Detail Servis', '/detailservis', 'fa-clipboard-list'],
+            ],
+            'DATA PELANGGAN & KENDARAAN' => [
+                ['Data Pelanggan', '/pelanggan', 'fa-users'],
+                ['Data Kendaraan', '/kendaraan', 'fa-car'],
+                ['Penugasan Teknisi', '/penugasan', 'fa-user-gear'],
+            ],
+        ];
+    } elseif ($roleId === 4) {
+        $kategoriMenu = [
+            'MENU UTAMA' => [
+                ['Penugasan Teknisi', '/penugasan', 'fa-user-gear'],
+                ['Booking Servis', '/booking', 'fa-calendar-check'],
+                ['Detail Servis', '/detailservis', 'fa-clipboard-list'],
+                ['Layanan Servis', '/layanan', 'fa-tools'],
+            ],
+        ];
+    } elseif ($roleId === 5) {
+        $kategoriMenu = [
+            'MENU UTAMA' => [
+                ['Servis Panggilan', '/homeservice', 'fa-motorcycle'],
+                ['Booking Servis', '/booking', 'fa-calendar-check'],
+            ],
+        ];
+    }
+    
+    $kartuMenu = [];
+    foreach ($kategoriMenu as $namaKategori => $daftarMenu) {
+        foreach ($daftarMenu as $menu) {
+            $kartuMenu[] = [
+                'kategori' => $namaKategori,
+                'nama' => $menu[0],
+                'url' => $menu[1],
+                'ikon' => $menu[2],
+            ];
+        }
+    }
+@endphp
 
-        <nav class="sidebar-nav" id="sidebarNav">
+<div class="layout">
+    <aside class="sidebar">
+        <div class="logo">🔧 <span>Bengkel</span>Servis</div>
 
-            {{-- Menu Utama --}}
-            <div class="nav-section-title">Menu Utama</div>
-            <div class="nav-item">
-                <a href="/dashboard" class="nav-link active" data-tooltip="Dashboard">
-                    <span class="nav-icon"><i class="fas fa-th-large"></i></span>
-                    <span class="nav-text">Dashboard</span>
-                </a>
-            </div>
+        @foreach ($kategoriMenu as $namaKategori => $daftarMenu)
+            <div class="menu-label">{{ $namaKategori }}</div>
+            <nav class="menu">
+                @foreach ($daftarMenu as $menu)
+                    @if ($menu[1] === '/dashboard')
+                        <a href="{{ $menu[1] }}" class="active">
+                            <span class="menu-icon"><i class="fas {{ $menu[2] }}"></i></span>
+                            {{ $menu[0] }}
+                        </a>
+                    @else
+                        <a href="{{ $menu[1] }}">
+                            <span class="menu-icon"><i class="fas {{ $menu[2] }}"></i></span>
+                            {{ $menu[0] }}
+                        </a>
+                    @endif
+                @endforeach
+            </nav>
+        @endforeach
 
-            {{-- Manajemen Cabang --}}
-            <div class="nav-section-title">Manajemen Cabang</div>
-            <div class="nav-item">
-                <a href="/cabang" class="nav-link" data-tooltip="Cabang">
-                    <span class="nav-icon"><i class="fas fa-building"></i></span>
-                    <span class="nav-text">Cabang</span>
+        @if ($roleId === 6)
+            <div class="menu-label">MENU PELANGGAN</div>
+            <nav class="menu">
+                <a href="/dashboard-pelanggan">
+                    <span class="menu-icon"><i class="fas fa-house"></i></span>
+                    Dashboard Pelanggan
                 </a>
-            </div>
+                <a href="/booking-pelanggan">
+                    <span class="menu-icon"><i class="fas fa-calendar-check"></i></span>
+                    Booking Saya
+                </a>
+                <a href="/kendaraan-pelanggan">
+                    <span class="menu-icon"><i class="fas fa-car"></i></span>
+                    Kendaraan Saya
+                </a>
+                <a href="/order-pelanggan">
+                    <span class="menu-icon"><i class="fas fa-box"></i></span>
+                    Pesanan Saya
+                </a>
+            </nav>
+        @endif
 
-            {{-- Data Master --}}
-            <div class="nav-section-title">Data Master</div>
-            <div class="nav-item">
-                <a href="/pelanggan" class="nav-link" data-tooltip="Pelanggan">
-                    <span class="nav-icon"><i class="fas fa-users"></i></span>
-                    <span class="nav-text">Pelanggan</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="/kendaraan" class="nav-link" data-tooltip="Kendaraan">
-                    <span class="nav-icon"><i class="fas fa-car"></i></span>
-                    <span class="nav-text">Kendaraan</span>
-                </a>
-            </div>
-
-            {{-- Manajemen Servis --}}
-            <div class="nav-section-title">Manajemen Servis</div>
-            <div class="nav-item">
-                <a href="#" class="nav-link has-submenu" data-tooltip="Booking">
-                    <span class="nav-icon"><i class="fas fa-calendar-check"></i></span>
-                    <span class="nav-text">Booking Servis</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu">
-                    <div class="nav-item">
-                        <a href="/booking" class="nav-link"><span class="nav-text">Daftar Booking</span></a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/booking/create" class="nav-link"><span class="nav-text">Booking Baru</span></a>
-                    </div>
-                </div>
-            </div>
-            <div class="nav-item">
-                <a href="#" class="nav-link has-submenu" data-tooltip="Layanan">
-                    <span class="nav-icon"><i class="fas fa-tools"></i></span>
-                    <span class="nav-text">Layanan Servis</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu">
-                    <div class="nav-item">
-                        <a href="/layanan" class="nav-link"><span class="nav-text">Daftar Layanan</span></a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/detailservis" class="nav-link"><span class="nav-text">Detail Servis</span></a>
-                    </div>
-                </div>
-            </div>
-            <div class="nav-item">
-                <a href="/teknisi" class="nav-link" data-tooltip="Teknisi">
-                    <span class="nav-icon"><i class="fas fa-hard-hat"></i></span>
-                    <span class="nav-text">Teknisi</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="/homeservice" class="nav-link" data-tooltip="Servis Panggilan">
-                    <span class="nav-icon"><i class="fas fa-motorcycle"></i></span>
-                    <span class="nav-text">Servis Panggilan</span>
-                </a>
-            </div>
-
-            {{-- Inventaris --}}
-            <div class="nav-section-title">Inventaris</div>
-            <div class="nav-item">
-                <a href="#" class="nav-link has-submenu" data-tooltip="Spare Part">
-                    <span class="nav-icon"><i class="fas fa-boxes"></i></span>
-                    <span class="nav-text">Spare Part</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu">
-                    <div class="nav-item">
-                        <a href="/sparepart" class="nav-link"><span class="nav-text">Daftar Spare Part</span></a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/kategori-sparepart" class="nav-link"><span class="nav-text">Kategori</span></a>
-                    </div>
-                </div>
-            </div>
-            <div class="nav-item">
-                <a href="#" class="nav-link has-submenu" data-tooltip="Pesanan">
-                    <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
-                    <span class="nav-text">Pesanan Spare Part</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu">
-                    <div class="nav-item">
-                        <a href="/order" class="nav-link"><span class="nav-text">Daftar Pesanan</span></a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/orderdetail" class="nav-link"><span class="nav-text">Detail Pesanan</span></a>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Keuangan --}}
-            <div class="nav-section-title">Keuangan</div>
-            <div class="nav-item">
-                <a href="#" class="nav-link has-submenu" data-tooltip="Pembayaran">
-                    <span class="nav-icon"><i class="fas fa-credit-card"></i></span>
-                    <span class="nav-text">Pembayaran</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu">
-                    <div class="nav-item">
-                        <a href="/pembayaran" class="nav-link"><span class="nav-text">Daftar Pembayaran</span></a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/metodepembayaran" class="nav-link"><span class="nav-text">Metode Pembayaran</span></a>
-                    </div>
-                </div>
-            </div>
-            <div class="nav-item">
-                <a href="/promo" class="nav-link" data-tooltip="Promo">
-                    <span class="nav-icon"><i class="fas fa-tags"></i></span>
-                    <span class="nav-text">Promo</span>
-                </a>
-            </div>
-
-            {{-- Pengiriman --}}
-            <div class="nav-section-title">Pengiriman</div>
-            <div class="nav-item">
-                <a href="/pengiriman" class="nav-link" data-tooltip="Pengiriman">
-                    <span class="nav-icon"><i class="fas fa-truck"></i></span>
-                    <span class="nav-text">Pengiriman</span>
-                </a>
-            </div>
-
-            {{-- Ulasan --}}
-            <div class="nav-section-title">Ulasan</div>
-            <div class="nav-item">
-                <a href="/rating" class="nav-link" data-tooltip="Ulasan">
-                    <span class="nav-icon"><i class="fas fa-star"></i></span>
-                    <span class="nav-text">Rating & Ulasan</span>
-                </a>
-            </div>
-
-            {{-- Administrasi --}}
-            <div class="nav-section-title">Administrasi</div>
-            <div class="nav-item">
-                <a href="/user" class="nav-link" data-tooltip="Pengguna">
-                    <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
-                    <span class="nav-text">Pengguna</span>
-                </a>
-            </div>
-            <div class="nav-item">
-                <a href="/role" class="nav-link" data-tooltip="Role">
-                    <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
-                    <span class="nav-text">Hak Akses (Role)</span>
-                </a>
-            </div>
-
-        </nav>
-
-        {{-- Footer Sidebar: Logout --}}
-        <div class="sidebar-footer">
-            <form action="/logout" method="POST" style="margin:0">
-                @csrf
-                <button type="submit" class="nav-link w-100" data-tooltip="Keluar"
-                        style="background:none;border:none;cursor:pointer;width:100%;text-align:left">
-                    <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>
-                    <span class="nav-text">Keluar</span>
-                </button>
-            </form>
-        </div>
-
+        <form action="/logout" method="POST"
+              onsubmit="return confirm('Yakin ingin keluar dari akun?')">
+            @csrf
+            <button type="submit" class="logout-sidebar">
+                <i class="fas fa-sign-out-alt"></i> Keluar
+            </button>
+        </form>
     </aside>
 
-    {{-- Overlay mobile --}}
-    <div class="mobile-overlay" id="mobileOverlay"></div>
+    <div class="main">
+        <header class="topbar">
+            <div><strong>Panel Administrasi</strong></div>
 
-    {{-- ============================================================
-         KONTEN UTAMA
-         ============================================================ --}}
-    <div class="main-content" id="mainContent">
-
-        {{-- Header --}}
-        <header class="app-header">
-            <div class="header-left">
-                <button class="btn-toggle-sidebar" id="btnToggleSidebar" title="Toggle Sidebar">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <nav class="page-breadcrumb">
-                    <span>BengkelServis</span>
-                    <i class="fas fa-chevron-right" style="font-size:0.65rem"></i>
-                    <span class="breadcrumb-current">Dashboard</span>
-                </nav>
-            </div>
-
-            <div class="header-right">
-                {{-- Notifikasi --}}
-                <button class="header-action-btn" title="Notifikasi" id="btnNotif">
-                    <i class="fas fa-bell"></i>
-                    <span class="notif-dot"></span>
-                </button>
-
-                <div class="header-divider"></div>
-
-                {{-- Info pengguna dari sesi Laravel --}}
-                @php
-                    $namaUser  = session('user_nama', 'Pengguna');
-                    $roleId    = session('role_id', 0);
-                    // Pemetaan role_id ke nama role berdasarkan struktur middleware
-                    $namaRole  = match((int) $roleId) {
-                        1 => 'Super Admin',
-                        2 => 'Admin Cabang',
-                        3 => 'Petugas Servis',
-                        4 => 'Teknisi',
-                        5 => 'Montir Lapangan',
-                        default => 'Pengguna'
-                    };
-                    // Buat inisial avatar dari nama (maks 2 kata)
-                    $bagian    = explode(' ', trim($namaUser));
-                    $inisial   = strtoupper(substr($bagian[0], 0, 1) . (isset($bagian[1]) ? substr($bagian[1], 0, 1) : ''));
-                @endphp
-
-                <div class="dropdown">
-                    <div class="user-menu" data-dropdown="userDropdown">
-                        <div class="user-avatar">{{ $inisial }}</div>
-                        <div class="user-info">
-                            <span class="user-name">{{ $namaUser }}</span>
-                            <span class="user-role">{{ $namaRole }}</span>
-                        </div>
-                        <i class="fas fa-chevron-down" style="font-size:0.7rem;color:var(--color-text-muted);margin-left:4px"></i>
-                    </div>
-                    <div class="dropdown-menu" id="userDropdown">
-                        <a class="dropdown-item" href="#">
-                            <i class="fas fa-user-circle"></i> Profil Saya
-                        </a>
-                        <div class="dropdown-divider"></div>
-                        <div class="dropdown-item danger" style="cursor:pointer"
-                             onclick="document.getElementById('formLogoutDropdown').submit()">
-                            <i class="fas fa-sign-out-alt"></i> Keluar
-                        </div>
-                    </div>
+            <div class="user-area">
+                <div class="user-info">
+                    <strong>{{ $namaUser }}</strong>
+                    <span>{{ $namaRole }}</span>
                 </div>
-
-                {{-- Form logout tersembunyi untuk dropdown --}}
-                <form id="formLogoutDropdown" action="/logout" method="POST" style="display:none">
+                <form action="/logout" method="POST"
+                      onsubmit="return confirm('Yakin ingin keluar dari akun?')">
                     @csrf
+                    <button type="submit" class="logout">Keluar ↗</button>
                 </form>
             </div>
         </header>
 
-        {{-- ============================================================
-             KONTEN HALAMAN DASHBOARD
-             ============================================================ --}}
-        <main class="page-content">
+        <main class="content">
+            <div class="breadcrumb">Beranda / Dashboard {{ $namaRole }}</div>
 
-            {{-- Banner Selamat Datang — nama dari sesi Laravel --}}
-            <div class="welcome-banner">
-                <div class="welcome-text">
-                    <h2>Selamat Datang, {{ $namaUser }} 👋</h2>
-                    <p>Berikut ringkasan operasional bengkel. Anda masuk sebagai <strong>{{ $namaRole }}</strong>.</p>
-                    <span class="demo-tag">
-                        <i class="fas fa-flask"></i>
-                        Statistik di bawah ini adalah <strong>DATA DEMONSTRASI</strong> — belum diambil dari database
-                    </span>
-                </div>
-                <div class="welcome-stats">
-                    <div class="welcome-stat-item">
-                        <div class="val" id="statBookingHariIni">—</div>
-                        <div class="lbl">Booking Hari Ini</div>
-                    </div>
-                    <div class="welcome-stat-divider"></div>
-                    <div class="welcome-stat-item">
-                        <div class="val" id="statTeknisiAktif">—</div>
-                        <div class="lbl">Teknisi Aktif</div>
-                    </div>
-                    <div class="welcome-stat-divider"></div>
-                    <div class="welcome-stat-item">
-                        <div class="val" id="statRating">—</div>
-                        <div class="lbl">Rating Rata-rata</div>
-                    </div>
-                </div>
+            <div class="heading">
+                <h1>Dashboard {{ $namaRole }}</h1>
+                <p class="subtitle">
+                    Kelola informasi dan operasional BengkelServis sesuai peran akun kamu.
+                </p>
             </div>
 
-            {{-- Kartu Statistik --}}
-            <div class="stats-grid" style="margin-bottom:24px">
-
-                <div class="stat-card stat-blue">
-                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-value" id="statTotalBooking">—</div>
-                        <div class="stat-label">Total Booking</div>
-                        <div class="stat-change up"><i class="fas fa-info-circle"></i> Data demonstrasi</div>
-                    </div>
-                </div>
-
-                <div class="stat-card stat-amber">
-                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-value" id="statMenunggu">—</div>
-                        <div class="stat-label">Menunggu Konfirmasi</div>
-                        <div class="stat-change up"><i class="fas fa-info-circle"></i> Data demonstrasi</div>
-                    </div>
-                </div>
-
-                <div class="stat-card stat-info">
-                    <div class="stat-icon"><i class="fas fa-wrench"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-value" id="statDikerjakan">—</div>
-                        <div class="stat-label">Sedang Dikerjakan</div>
-                        <div class="stat-change up"><i class="fas fa-info-circle"></i> Data demonstrasi</div>
-                    </div>
-                </div>
-
-                <div class="stat-card stat-green">
-                    <div class="stat-icon"><i class="fas fa-users"></i></div>
-                    <div class="stat-info">
-                        <div class="stat-value" id="statPelanggan">—</div>
-                        <div class="stat-label">Total Pelanggan</div>
-                        <div class="stat-change up"><i class="fas fa-info-circle"></i> Data demonstrasi</div>
-                    </div>
-                </div>
-
-            </div>
-
-            {{-- Aksi Cepat — URL menuju route Laravel --}}
-            <div style="margin-bottom:24px">
-                <div class="section-title"><i class="fas fa-bolt"></i> Aksi Cepat</div>
-                <div class="quick-actions">
-
-                    <a href="/booking/create" class="quick-action-card">
-                        <div class="quick-action-icon" style="background:rgba(32,53,101,0.08);color:var(--color-primary)">
-                            <i class="fas fa-calendar-plus"></i>
-                        </div>
-                        <span class="quick-action-label">Booking Baru</span>
-                    </a>
-
-                    <a href="/pelanggan/create" class="quick-action-card">
-                        <div class="quick-action-icon" style="background:rgba(34,197,94,0.10);color:var(--color-success)">
-                            <i class="fas fa-user-plus"></i>
-                        </div>
-                        <span class="quick-action-label">Tambah Pelanggan</span>
-                    </a>
-
-                    <a href="/kendaraan" class="quick-action-card">
-                        <div class="quick-action-icon" style="background:rgba(59,130,246,0.10);color:var(--color-info)">
-                            <i class="fas fa-car"></i>
-                        </div>
-                        <span class="quick-action-label">Data Kendaraan</span>
-                    </a>
-
-                    <a href="/sparepart" class="quick-action-card">
-                        <div class="quick-action-icon" style="background:rgba(197,162,140,0.15);color:#8b5e3c">
-                            <i class="fas fa-boxes"></i>
-                        </div>
-                        <span class="quick-action-label">Spare Part</span>
-                    </a>
-
-                    <a href="/pembayaran" class="quick-action-card">
-                        <div class="quick-action-icon" style="background:rgba(245,158,11,0.10);color:var(--color-warning)">
-                            <i class="fas fa-credit-card"></i>
-                        </div>
-                        <span class="quick-action-label">Pembayaran</span>
-                    </a>
-
-                    <a href="/rating" class="quick-action-card">
-                        <div class="quick-action-icon" style="background:rgba(139,92,246,0.10);color:#7c3aed">
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <span class="quick-action-label">Rating & Ulasan</span>
-                    </a>
-
-                </div>
-            </div>
-
-            {{-- Grid Utama: Tabel Booking (kiri) + Widget (kanan) --}}
-            <div class="dashboard-grid">
-
-                {{-- Kolom Kiri: Tabel Booking --}}
+            <section class="hero">
                 <div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-calendar-alt" style="color:var(--color-accent);margin-right:6px"></i>
-                                Ringkasan Booking
-                            </h3>
-                            <a href="/booking" class="btn btn-ghost btn-sm">
-                                Lihat Semua <i class="fas fa-arrow-right" style="margin-left:4px"></i>
-                            </a>
-                        </div>
-
-                        {{-- Filter & Pencarian --}}
-                        <div style="padding:14px 20px;border-bottom:1px solid var(--color-border-light)">
-                            <div class="filter-bar" style="margin-bottom:10px" id="filterBarBooking">
-                                <button class="filter-btn active" data-filter="semua">Semua</button>
-                                <button class="filter-btn" data-filter="menunggu">Menunggu</button>
-                                <button class="filter-btn" data-filter="dikonfirmasi">Dikonfirmasi</button>
-                                <button class="filter-btn" data-filter="dikerjakan">Dikerjakan</button>
-                                <button class="filter-btn" data-filter="selesai">Selesai</button>
-                                <button class="filter-btn" data-filter="dibatalkan">Dibatalkan</button>
-                            </div>
-                            <div class="search-input-wrapper" style="max-width:380px">
-                                <i class="fas fa-search"></i>
-                                <input type="text" id="inputCariBooking" class="search-input"
-                                       placeholder="Cari kode, nama, kendaraan, servis...">
-                            </div>
-                        </div>
-
-                        {{-- Tabel --}}
-                        <div class="table-container">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>Kode Booking</th>
-                                        <th>Pelanggan</th>
-                                        <th>Kendaraan</th>
-                                        <th>Jenis Servis</th>
-                                        <th>Cabang</th>
-                                        <th>Jadwal</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbodyBooking"></tbody>
-                            </table>
-                            <div id="emptyStateBooking" class="table-empty" style="display:none">
-                                <i class="fas fa-search"></i>
-                                <p>Tidak ada data yang cocok dengan pencarian atau filter.</p>
-                            </div>
-                        </div>
-
-                        <div class="card-footer d-flex justify-between align-center flex-wrap gap-1">
-                            <span class="text-xs text-muted" id="infoJumlah">
-                                <i class="fas fa-spinner fa-spin"></i> Memuat...
-                            </span>
-                            <span class="text-xs text-muted">
-                                <i class="fas fa-database"></i>
-                                DATA DEMONSTRASI — belum diambil dari database
-                            </span>
-                        </div>
-                    </div>
+                    <h2>Selamat datang, {{ $namaUser }}! 👋</h2>
+                    <p>
+                        Ini adalah pusat pengelolaan sistem BengkelServis.
+                        Pilih menu di bawah untuk mengakses informasi dan
+                        pekerjaan sesuai peran akun kamu.
+                    </p>
                 </div>
+                <div class="hero-icon">🏢</div>
+            </section>
 
-                {{-- Kolom Kanan: Widget --}}
-                <div style="display:flex;flex-direction:column;gap:20px">
+            <h2 class="section-title">Manajemen Sistem</h2>
 
-                    {{-- Status Servis --}}
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-chart-pie" style="color:var(--color-accent);margin-right:6px"></i>
-                                Status Servis
-                            </h3>
-                            <span class="badge badge-neutral text-xs" id="badgeTotalServis">—</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="status-servis-list" id="statusServisList">
-                                <div style="text-align:center;color:var(--color-text-muted);padding:12px 0;font-size:0.85rem">
-                                    Memuat data demonstrasi...
-                                </div>
-                            </div>
-                            <p class="text-xs text-muted mt-2">
-                                <i class="fas fa-info-circle"></i> Data demonstrasi
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Aktivitas Terbaru --}}
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-history" style="color:var(--color-accent);margin-right:6px"></i>
-                                Aktivitas Terbaru
-                            </h3>
-                        </div>
-                        <div class="card-body" style="padding-top:4px;padding-bottom:4px">
-                            <div class="activity-list" id="listAktivitas"></div>
-                        </div>
-                        <div class="card-footer">
-                            <p class="text-xs text-muted">
-                                <i class="fas fa-info-circle"></i>
-                                Data demonstrasi — bukan log sistem asli
-                            </p>
-                        </div>
-                    </div>
-
+            @if ($roleId === 6)
+                <div class="grid">
+                    <a class="card" href="/dashboard-pelanggan">
+                        <div class="card-icon"><i class="fas fa-house"></i></div>
+                        <h3>Dashboard Pelanggan</h3>
+                        <p>Buka dashboard pelanggan untuk mengelola layanan kamu.</p>
+                        <span class="card-link">Buka dashboard →</span>
+                    </a>
                 </div>
-                {{-- /Kolom Kanan --}}
+            @else
+                <div class="grid">
+                    @forelse ($kartuMenu as $menu)
+                        <a class="card" href="{{ $menu['url'] }}">
+                            <div class="card-icon">
+                                <i class="fas {{ $menu['ikon'] }}"></i>
+                            </div>
+                            <h3>{{ $menu['nama'] }}</h3>
+                            <p>
+                                @switch($menu['nama'])
+                                    @case('Pengguna')
+                                        Kelola akun pengguna, data login, dan status akun.
+                                        @break
+                                    @case('Role Pengguna')
+                                        Kelola pembagian peran dan hak akses sistem.
+                                        @break
+                                    @case('Admin Cabang')
+                                        Kelola akun administrator cabang.
+                                        @break
+                                    @case('Data Cabang')
+                                    @case('Cabang Bengkel')
+                                        Kelola informasi cabang bengkel.
+                                        @break
+                                    @case('Operasional Cabang')
+                                        Kelola data operasional cabang.
+                                        @break
+                                    @case('Data Pelanggan')
+                                        Lihat dan kelola data pelanggan bengkel.
+                                        @break
+                                    @case('Data Kendaraan')
+                                        Kelola kendaraan yang terdaftar pada sistem.
+                                        @break
+                                    @case('Booking Servis')
+                                        Pantau booking servis yang masuk.
+                                        @break
+                                    @case('Layanan Servis')
+                                        Kelola jenis layanan dan harga servis.
+                                        @break
+                                    @case('Detail Servis')
+                                        Kelola rincian pengerjaan servis.
+                                        @break
+                                    @case('Penugasan Teknisi')
+                                        Kelola penugasan teknisi.
+                                        @break
+                                    @case('Data Teknisi')
+                                        Kelola data teknisi bengkel.
+                                        @break
+                                    @case('Montir Lapangan')
+                                        Kelola data montir lapangan.
+                                        @break
+                                    @case('Spare Part')
+                                    @case('Data Spare Part')
+                                        Pantau stok dan informasi suku cadang.
+                                        @break
+                                    @case('Kategori Spare Part')
+                                        Kelola kategori suku cadang.
+                                        @break
+                                    @case('Kelola Pesanan Spare Part')
+                                    @case('Pesanan Spare Part')
+                                        Lihat pesanan pelanggan dan status pesanan.
+                                        @break
+                                    @case('Detail Pesanan')
+                                        Lihat rincian pesanan suku cadang.
+                                        @break
+                                    @case('Pengiriman')
+                                        Kelola informasi pengiriman barang.
+                                        @break
+                                    @case('Ekspedisi')
+                                        Kelola data jasa ekspedisi.
+                                        @break
+                                    @case('Promo')
+                                        Kelola promo dan periode berlakunya.
+                                        @break
+                                    @case('Metode Pembayaran')
+                                        Kelola metode pembayaran.
+                                        @break
+                                    @case('Data Pembayaran')
+                                    @case('Pembayaran')
+                                        Pantau transaksi pembayaran pelanggan.
+                                        @break
+                                    @case('Rating & Ulasan')
+                                        Lihat penilaian pelanggan terhadap layanan.
+                                        @break
+                                    @default
+                                        Akses informasi sesuai menu yang tersedia.
+                                @endswitch
+                            </p>
+                            <span class="card-link">
+                                Buka menu <i class="fas fa-arrow-right"></i>
+                            </span>
+                        </a>
+                    @empty
+                        <div class="card">
+                            <div class="card-icon"><i class="fas fa-circle-info"></i></div>
+                            <h3>Menu Belum Tersedia</h3>
+                            <p>Belum ada menu yang dikonfigurasi untuk role ini.</p>
+                        </div>
+                    @endforelse
+                </div>
+            @endif
 
+            <div class="notice">
+                <strong>💡 Informasi</strong><br>
+                Tampilan dashboard menggunakan desain yang seragam.
+                Menu yang ditampilkan mengikuti konfigurasi role, sedangkan
+                hak akses setiap halaman tetap ditentukan oleh route dan middleware.
             </div>
-            {{-- /Dashboard Grid --}}
-
         </main>
-        {{-- /page-content --}}
 
-    </div>
-    {{-- /main-content --}}
-
-</div>
-{{-- /app-wrapper --}}
-
-{{-- Toast Container --}}
-<div class="toast-container" id="toastContainer"></div>
-
-{{-- Modal Detail Booking --}}
-<div class="modal-overlay" id="modalDetailBooking">
-    <div class="modal" style="max-width:600px">
-        <div class="modal-header">
-            <h3 class="modal-title">
-                <i class="fas fa-calendar-check" style="color:var(--color-accent);margin-right:8px"></i>
-                Detail Booking
-            </h3>
-            <button class="modal-close" data-modal-close="modalDetailBooking">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <div class="modal-body" id="modalDetailContent"></div>
-        <div class="modal-footer">
-            <span class="text-xs text-muted" style="flex:1">
-                <i class="fas fa-info-circle"></i> Data demonstrasi — bukan dari database asli.
-            </span>
-            <button class="btn btn-ghost" data-modal-close="modalDetailBooking">Tutup</button>
-            <a href="/booking" class="btn btn-primary">
-                <i class="fas fa-list"></i> Lihat Semua Booking
-            </a>
-        </div>
+        <footer>
+            © {{ date('Y') }} BengkelServis — Panel {{ $namaRole }}
+        </footer>
     </div>
 </div>
-
-{{-- ============================================================
-     JAVASCRIPT
-     Urutan: data.js → app.js → logika dashboard inline
-     components.js TIDAK digunakan di Blade karena renderLayout()
-     bergantung pada window.location.pathname yang tidak cocok
-     dengan URL Laravel.
-     ============================================================ --}}
-<script src="{{ asset('assets/js/data.js') }}"></script>
-<script src="{{ asset('assets/js/app.js') }}"></script>
-
-<script>
-// ============================================================
-// ISI ANGKA STATISTIK DARI DEMO_DATA
-// Ditandai jelas sebagai demonstrasi di HTML di atas.
-// ============================================================
-(function() {
-    var st = DEMO_DATA.stats;
-    var ss = DEMO_DATA.statusServis;
-    var total = Object.values(ss).reduce(function(s, d) { return s + d.jumlah; }, 0);
-
-    // Banner
-    document.getElementById('statBookingHariIni').textContent = st.bookingHariIni;
-    document.getElementById('statTeknisiAktif').textContent   = st.teknisiAktif;
-    document.getElementById('statRating').textContent         = st.ratingRataRata;
-
-    // Kartu
-    document.getElementById('statTotalBooking').textContent = total;
-    document.getElementById('statMenunggu').textContent     = ss.menunggu.jumlah;
-    document.getElementById('statDikerjakan').textContent   = ss.dikerjakan.jumlah;
-    document.getElementById('statPelanggan').textContent    = st.totalPelanggan;
-
-    // Badge total servis
-    document.getElementById('badgeTotalServis').textContent = total + ' total';
-
-    // Status Servis list
-    var list = document.getElementById('statusServisList');
-    if (list) {
-        list.innerHTML = Object.entries(ss).map(function(entry) {
-            var key = entry[0]; var val = entry[1];
-            var persen = total > 0 ? Math.round((val.jumlah / total) * 100) : 0;
-            return '<div class="status-servis-item">' +
-                '<span class="status-servis-dot" style="background:' + val.warna + '"></span>' +
-                '<span class="status-servis-label">' + val.label + '</span>' +
-                '<span class="status-servis-count">' + val.jumlah + '</span>' +
-            '</div>' +
-            '<div class="status-servis-bar">' +
-                '<div class="status-servis-bar-fill" style="width:0%;background:' + val.warna + '" id="bar-' + key + '"></div>' +
-            '</div>';
-        }).join('');
-        // Animasi progress bar
-        setTimeout(function() {
-            Object.keys(ss).forEach(function(key) {
-                var bar = document.getElementById('bar-' + key);
-                if (bar) {
-                    var p = total > 0 ? Math.round((ss[key].jumlah / total) * 100) : 0;
-                    bar.style.width = p + '%';
-                }
-            });
-        }, 150);
-    }
-})();
-
-// ============================================================
-// TABEL BOOKING DEMONSTRASI
-// ============================================================
-var STATUS_CONFIG = {
-    menunggu:     { label: 'Menunggu',          kelas: 'badge-warning',  dot: '#f59e0b' },
-    dikonfirmasi: { label: 'Dikonfirmasi',      kelas: 'badge-info',     dot: '#3b82f6' },
-    dikerjakan:   { label: 'Sedang Dikerjakan', kelas: 'badge-primary',  dot: '#8b5cf6' },
-    selesai:      { label: 'Selesai',           kelas: 'badge-success',  dot: '#22c55e' },
-    dibatalkan:   { label: 'Dibatalkan',        kelas: 'badge-danger',   dot: '#ef4444' },
-};
-
-var filterAktif = 'semua';
-var kataCari    = '';
-
-function renderBarisTabel(item) {
-    var st  = STATUS_CONFIG[item.status] || { label: item.status, kelas: 'badge-neutral', dot: '#94a3b8' };
-    var tgl = formatTanggal(item.jadwal.split(' ')[0]);
-    var jam = item.jadwal.split(' ')[1] || '';
-    return '<tr>' +
-        '<td><span style="font-family:var(--font-heading);font-weight:700;font-size:0.82rem;color:var(--color-primary)">' + item.id + '</span></td>' +
-        '<td><div style="font-weight:600;font-size:0.875rem">' + item.pelanggan + '</div>' +
-             '<div style="font-size:0.75rem;color:var(--color-text-muted)">' + item.telepon + '</div></td>' +
-        '<td><div style="font-weight:500;font-size:0.84rem">' + item.kendaraan + '</div>' +
-             '<div style="font-size:0.75rem;color:var(--color-text-muted)">' + item.plat + '</div></td>' +
-        '<td style="font-size:0.84rem">' + item.servis + '</td>' +
-        '<td><span style="font-size:0.78rem;background:rgba(32,53,101,0.07);padding:3px 8px;border-radius:6px;color:var(--color-primary);font-weight:500">' + item.cabang + '</span></td>' +
-        '<td><div style="font-size:0.83rem;font-weight:500">' + tgl + '</div>' +
-             '<div style="font-size:0.75rem;color:var(--color-text-muted)">' + jam + '</div></td>' +
-        '<td><span class="badge ' + st.kelas + '"><span class="badge-dot" style="background:' + st.dot + '"></span>' + st.label + '</span></td>' +
-        '<td><div class="actions-cell">' +
-            '<button class="btn btn-outline btn-sm btn-icon" title="Lihat Detail" onclick="lihatDetailBooking(\'' + item.id + '\')">' +
-                '<i class="fas fa-eye"></i>' +
-            '</button>' +
-            '<a href="/booking" class="btn btn-ghost btn-sm btn-icon" title="Kelola di backend">' +
-                '<i class="fas fa-external-link-alt"></i>' +
-            '</a>' +
-        '</div></td>' +
-    '</tr>';
-}
-
-function isiTabel(data) {
-    var tbody = document.getElementById('tbodyBooking');
-    var empty = document.getElementById('emptyStateBooking');
-    var info  = document.getElementById('infoJumlah');
-    if (!tbody) return;
-    if (data.length === 0) {
-        tbody.innerHTML = '';
-        if (empty) empty.style.display = 'block';
-    } else {
-        tbody.innerHTML = data.map(renderBarisTabel).join('');
-        if (empty) empty.style.display = 'none';
-    }
-    if (info) info.innerHTML =
-        '<i class="fas fa-info-circle"></i> Menampilkan ' + data.length +
-        ' dari ' + DEMO_DATA.bookingLengkap.length +
-        ' data demonstrasi (belum dari database)';
-}
-
-function terapkanFilter() {
-    var hasil = DEMO_DATA.bookingLengkap.slice();
-    if (filterAktif !== 'semua') {
-        hasil = hasil.filter(function(b) { return b.status === filterAktif; });
-    }
-    if (kataCari.trim() !== '') {
-        var q = kataCari.toLowerCase();
-        hasil = hasil.filter(function(b) {
-            return b.id.toLowerCase().includes(q) ||
-                   b.pelanggan.toLowerCase().includes(q) ||
-                   b.kendaraan.toLowerCase().includes(q) ||
-                   b.servis.toLowerCase().includes(q) ||
-                   b.cabang.toLowerCase().includes(q);
-        });
-    }
-    isiTabel(hasil);
-}
-
-document.querySelectorAll('.filter-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-        btn.classList.add('active');
-        filterAktif = btn.getAttribute('data-filter');
-        terapkanFilter();
-    });
-});
-
-var inputCari = document.getElementById('inputCariBooking');
-if (inputCari) {
-    inputCari.addEventListener('input', function() {
-        kataCari = this.value;
-        terapkanFilter();
-    });
-}
-
-isiTabel(DEMO_DATA.bookingLengkap);
-
-// ============================================================
-// MODAL DETAIL BOOKING
-// ============================================================
-function lihatDetailBooking(id) {
-    var item = DEMO_DATA.bookingLengkap.find(function(b) { return b.id === id; });
-    if (!item) { showToast('Data tidak ditemukan.', 'error'); return; }
-    var st  = STATUS_CONFIG[item.status] || { label: item.status, kelas: 'badge-neutral', dot: '#94a3b8' };
-    var tgl = formatTanggal(item.jadwal.split(' ')[0]);
-    var jam = item.jadwal.split(' ')[1] || '-';
-    var rows = [
-        ['Pelanggan',   item.pelanggan],
-        ['Telepon',     item.telepon],
-        ['Kendaraan',   item.kendaraan + ' (' + item.plat + ')'],
-        ['Jenis Servis',item.servis],
-        ['Cabang',      item.cabang],
-        ['Jadwal',      tgl + ' pukul ' + jam + ' WIB'],
-        ['Teknisi',     item.teknisi],
-        ['Total Biaya', item.total > 0 ? formatRupiah(item.total) : '-'],
-        ['Catatan',     item.catatan || '-'],
-    ];
-    var html = '<div style="margin-bottom:16px;display:flex;align-items:center;gap:10px">' +
-        '<span style="font-family:var(--font-heading);font-size:1.1rem;font-weight:800;color:var(--color-primary)">' + item.id + '</span>' +
-        '<span class="badge ' + st.kelas + '"><span class="badge-dot" style="background:' + st.dot + '"></span>' + st.label + '</span>' +
-        '</div>' +
-        rows.map(function(r) {
-            return '<div class="detail-row"><span class="detail-label">' + r[0] + '</span>' +
-                '<span class="detail-value">' + r[1] + '</span></div>';
-        }).join('');
-    document.getElementById('modalDetailContent').innerHTML = html;
-    openModal('modalDetailBooking');
-}
-
-// ============================================================
-// AKTIVITAS TERBARU
-// ============================================================
-var AKTIVITAS_ICON = {
-    booking: { kelas: 'booking', icon: 'fas fa-calendar-plus'  },
-    selesai: { kelas: 'selesai', icon: 'fas fa-check-circle'   },
-    bayar:   { kelas: 'bayar',   icon: 'fas fa-money-bill-wave' },
-    batal:   { kelas: 'batal',   icon: 'fas fa-times-circle'   },
-    teknisi: { kelas: 'teknisi', icon: 'fas fa-hard-hat'        },
-};
-
-(function() {
-    var container = document.getElementById('listAktivitas');
-    if (!container) return;
-    container.innerHTML = DEMO_DATA.aktivitasTerbaru.map(function(ak) {
-        var cfg = AKTIVITAS_ICON[ak.tipe] || { kelas: 'booking', icon: 'fas fa-circle' };
-        return '<div class="activity-item">' +
-            '<div class="activity-icon ' + cfg.kelas + '"><i class="' + cfg.icon + '"></i></div>' +
-            '<div class="activity-body">' +
-                '<div class="activity-title">' + ak.judul + '</div>' +
-                '<div class="activity-desc">' + ak.deskripsi + '</div>' +
-            '</div>' +
-            '<div class="activity-time">' + ak.waktu + '</div>' +
-        '</div>';
-    }).join('');
-})();
-
-// Notifikasi bell
-document.getElementById('btnNotif').addEventListener('click', function() {
-    showToast('Belum ada notifikasi baru.', 'info');
-});
-</script>
-
 </body>
 </html>

@@ -4,31 +4,56 @@ namespace App\Http\Controllers;
 
 use App\Models\Kendaraan;
 use App\Models\Pelanggan;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class KendaraanController extends Controller
 {
-    // Menampilkan semua kendaraan
+    /**
+     * Membatasi kendaraan berdasarkan booking di cabang admin.
+     */
+    private function queryKendaraan()
+    {
+        $query = Kendaraan::query();
+
+        if ((int) session('role_id') === 2) {
+            $user = User::findOrFail(session('user_id'));
+
+            $cabangId = $user->cabang_id
+                ?? $user->adminCabang?->cabang_id;
+
+            abort_if(
+                !$cabangId,
+                403,
+                'Akun Admin Cabang belum terhubung dengan cabang.'
+            );
+
+            $query->whereHas('bookingServis', function ($booking) use ($cabangId) {
+                $booking->where('id_cabang', $cabangId);
+            });
+        }
+
+        return $query;
+    }
+
     public function index()
     {
-        $kendaraan = Kendaraan::with([
-            'pelanggan',
-            'bookingServis',
-            'homeServis'
-        ])->get();
+        $kendaraan = $this->queryKendaraan()
+            ->with('pelanggan')
+            ->get();
 
-        return view('kendaraan.index', compact('kendaraan'));
+        return view('admin.kendaraan.index', compact('kendaraan'));
     }
 
-    // Form tambah kendaraan
     public function create()
     {
-        $pelanggan = Pelanggan::orderBy('nama')->get();
+        $pelanggan = $this->pelangganUntukCabang()
+            ->orderBy('nama')
+            ->get();
 
-        return view('kendaraan.create', compact('pelanggan'));
+        return view('admin.kendaraan.create', compact('pelanggan'));
     }
 
-    // Menyimpan kendaraan
     public function store(Request $request)
     {
         $request->validate([
@@ -36,66 +61,111 @@ class KendaraanController extends Controller
             'merk' => 'required|string|max:100',
             'model' => 'required|string|max:100',
             'tahun' => 'required|integer|min:1900|max:2100',
-            'nopol' => 'required|string|max:20',
+            'nopol' => 'required|string|max:20|unique:Kendaraan,nopol',
         ]);
 
-        Kendaraan::create([
-            'id_pelanggan' => $request->id_pelanggan,
-            'merk' => $request->merk,
-            'model' => $request->model,
-            'tahun' => $request->tahun,
-            'nopol' => $request->nopol,
-        ]);
+        $this->pelangganUntukCabang()
+            ->findOrFail($request->id_pelanggan);
+
+        Kendaraan::create($request->only([
+            'id_pelanggan',
+            'merk',
+            'model',
+            'tahun',
+            'nopol',
+        ]));
 
         return redirect('/kendaraan')
             ->with('success', 'Kendaraan berhasil ditambahkan.');
     }
 
-    // Form edit kendaraan
     public function edit($id)
     {
-        $kendaraan = Kendaraan::findOrFail($id);
-        $pelanggan = Pelanggan::orderBy('nama')->get();
+        $kendaraan = $this->queryKendaraan()->findOrFail($id);
 
-        return view('kendaraan.edit', compact(
+        $pelanggan = $this->pelangganUntukCabang()
+            ->orderBy('nama')
+            ->get();
+
+        return view('admin.kendaraan.edit', compact(
             'kendaraan',
             'pelanggan'
         ));
     }
 
-    // Update kendaraan
     public function update(Request $request, $id)
     {
+        $kendaraan = $this->queryKendaraan()->findOrFail($id);
+
         $request->validate([
             'id_pelanggan' => 'required|exists:Pelanggan,id_pelanggan',
             'merk' => 'required|string|max:100',
             'model' => 'required|string|max:100',
             'tahun' => 'required|integer|min:1900|max:2100',
-            'nopol' => 'required|string|max:20',
+            'nopol' => 'required|string|max:20|unique:Kendaraan,nopol,'
+                . $id . ',id_kendaraan',
         ]);
 
-        $kendaraan = Kendaraan::findOrFail($id);
+        $this->pelangganUntukCabang()
+            ->findOrFail($request->id_pelanggan);
 
-        $kendaraan->update([
-            'id_pelanggan' => $request->id_pelanggan,
-            'merk' => $request->merk,
-            'model' => $request->model,
-            'tahun' => $request->tahun,
-            'nopol' => $request->nopol,
-        ]);
+        $kendaraan->update($request->only([
+            'id_pelanggan',
+            'merk',
+            'model',
+            'tahun',
+            'nopol',
+        ]));
 
         return redirect('/kendaraan')
             ->with('success', 'Data kendaraan berhasil diubah.');
     }
 
-    // Hapus kendaraan
     public function destroy($id)
     {
-        $kendaraan = Kendaraan::findOrFail($id);
+        $kendaraan = $this->queryKendaraan()->findOrFail($id);
+
+        if (
+            $kendaraan->bookingServis()->exists() ||
+            $kendaraan->homeServis()->exists()
+        ) {
+            return redirect('/kendaraan')
+                ->with(
+                    'error',
+                    'Kendaraan tidak dapat dihapus karena masih memiliki riwayat servis.'
+                );
+        }
 
         $kendaraan->delete();
 
         return redirect('/kendaraan')
             ->with('success', 'Kendaraan berhasil dihapus.');
+    }
+
+    /**
+     * Daftar pelanggan yang boleh dipilih oleh admin cabang.
+     */
+    private function pelangganUntukCabang()
+    {
+        $query = Pelanggan::query();
+
+        if ((int) session('role_id') === 2) {
+            $user = User::findOrFail(session('user_id'));
+
+            $cabangId = $user->cabang_id
+                ?? $user->adminCabang?->cabang_id;
+
+            abort_if(
+                !$cabangId,
+                403,
+                'Akun Admin Cabang belum terhubung dengan cabang.'
+            );
+
+            $query->whereHas('bookingServis', function ($booking) use ($cabangId) {
+                $booking->where('id_cabang', $cabangId);
+            });
+        }
+
+        return $query;
     }
 }

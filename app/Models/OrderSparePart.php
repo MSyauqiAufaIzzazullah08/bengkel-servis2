@@ -6,7 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class OrderSparePart extends Model
 {
-    protected $table = 'OrderSparePart';
+    protected $table = 'ordersparepart';
+
     protected $primaryKey = 'id_order';
 
     public $timestamps = false;

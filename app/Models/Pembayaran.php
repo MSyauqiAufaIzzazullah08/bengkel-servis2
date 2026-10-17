@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Pembayaran extends Model
 {
     protected $table = 'Pembayaran';
+
     protected $primaryKey = 'id_pembayaran';
 
     public $timestamps = false;
 
     protected $fillable = [
         'id_booking',
+        'id_home_service',
         'id_order',
         'id_promo',
         'metode_pembayaran_id',
@@ -28,6 +30,15 @@ class Pembayaran extends Model
             BookingServis::class,
             'id_booking',
             'id_booking'
+        );
+    }
+
+    public function homeServis()
+    {
+        return $this->belongsTo(
+            HomeServis::class,
+            'id_home_service',
+            'id_home_service'
         );
     }
 

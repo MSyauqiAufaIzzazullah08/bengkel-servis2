@@ -92,4 +92,34 @@ class OrderSparePartController extends Controller
 
         return redirect('/order')->with('success', 'Data berhasil dihapus.');
     }
+    
+    /**
+     * Menampilkan pesanan spare part milik pelanggan yang login.
+     */
+    public function pesananPelanggan()
+    {
+        $pelanggan = Pelanggan::where(
+            'email',
+            session('user_email')
+        )->first();
+
+        if (!$pelanggan) {
+            abort(403, 'Data pelanggan tidak ditemukan.');
+        }
+
+        $orders = OrderSparePart::with([
+            'orderDetail.sparePart',
+            'pengiriman.ekspedisi',
+            'pembayaran.metodePembayaran',
+        ])
+        ->where('id_pelanggan', $pelanggan->id_pelanggan)
+        ->orderByDesc('tanggal_order')
+        ->get();
+
+        return view(
+            'pelanggan.order.index',
+            compact('orders')
+        );
+    }
+
 }

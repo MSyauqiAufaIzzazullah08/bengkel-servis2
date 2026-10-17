@@ -1,519 +1,656 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\LoginController;
-
+use App\Http\Controllers\RegistrasiController;
 use App\Http\Controllers\PelangganController;
-
 use App\Http\Controllers\KendaraanController;
-
 use App\Http\Controllers\BookingServisController;
-
 use App\Http\Controllers\OrderSparePartController;
-
 use App\Http\Controllers\HomeServisController;
-
 use App\Http\Controllers\CabangController;
-
 use App\Http\Controllers\TeknisiController;
-
 use App\Http\Controllers\PenugasanTeknisiController;
-
 use App\Http\Controllers\RoleController;
-
 use App\Http\Controllers\UserController;
-
 use App\Http\Controllers\AdminCabangController;
-
 use App\Http\Controllers\OperasionalCabangController;
-
 use App\Http\Controllers\SparePartController;
-
 use App\Http\Controllers\KategoriSparePartController;
-
 use App\Http\Controllers\OrderDetailController;
-
 use App\Http\Controllers\PengirimanController;
-
 use App\Http\Controllers\EkspedisiController;
-
 use App\Http\Controllers\PembayaranController;
-
 use App\Http\Controllers\RatingController;
-
 use App\Http\Controllers\LayananServisController;
-
 use App\Http\Controllers\DetailServisController;
-
 use App\Http\Controllers\PromoController;
-
 use App\Http\Controllers\MetodePembayaranController;
-
 use App\Http\Controllers\MontirLapanganController;
+use App\Http\Controllers\PelangganBookingController;
+use App\Http\Controllers\PelangganKendaraanController;
+use App\Http\Controllers\PelangganPembayaranController;
+use App\Http\Controllers\PelangganRatingController;
+use App\Http\Controllers\PelangganSparePartController;
+use App\Http\Controllers\AdminPesananSparePartController;
+use App\Http\Controllers\DashboardMontirLapanganController;
+use App\Http\Controllers\PembayaranHomeServisController;
 
-// ======================================================
-
-// AUTHENTICATION
-
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| LOGIN DAN REGISTRASI
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/login', [LoginController::class, 'showLogin']);
-
 Route::post('/login', [LoginController::class, 'login']);
-
 Route::post('/logout', [LoginController::class, 'logout']);
 
-// ======================================================
+Route::get('/register', [RegistrasiController::class, 'showRegister']);
+Route::post('/register', [RegistrasiController::class, 'register']);
 
-// DASHBOARD
+/*
+|--------------------------------------------------------------------------
+| HALAMAN PUBLIK
+|--------------------------------------------------------------------------
+*/
 
-// SEMUA ROLE
+Route::get('/', function () {
+    return view('public.welcome');
+});
 
-// ======================================================
+Route::get('/layanan-publik', function () {
+    $layanans = \App\Models\LayananServis::all();
 
-Route::middleware('role:1,2,3,4,5,6')->group(function () {
+    return view('public.layanan', compact('layanans'));
+});
+
+Route::get('/home-service-publik', function () {
+    return view('public.home-service-publik');
+});
+
+Route::get('/sparepart-publik', function () {
+    return view('public.sparepart');
+});
+
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD UMUM DAN PELANGGAN
+|--------------------------------------------------------------------------
+*/
+
+
+
+Route::middleware('role:1,2,3,4,5,6,9,10')->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return match ((int) session('role_id')) {
+            1 => redirect('/dashboard-super-admin'),
+            2 => redirect('/dashboard-admin-cabang'),
+            3 => redirect('/dashboard-petugas-service'),
+            4 => redirect('/dashboard-teknisi'),
+            5 => redirect('/dashboard-montir-lapangan'),
+            6 => redirect('/dashboard-pelanggan'),
+            9 => redirect('/dashboard-petugas-sparepart'),
+            10 => redirect('/dashboard-petugas-pengiriman'),
+            default => view('dashboard'),
+        };
     });
 });
 
 
- // DASHBOARD KHUSUS PELANGGAN (ROLE 6)
 Route::middleware('role:6')->group(function () {
     Route::get('/dashboard-pelanggan', function () {
         return view('dashboard-pelanggan');
     });
-});
 
-
-// ======================================================
-
-// SUPER ADMIN
-
-// ROLE 1
-
-// ======================================================
-
-Route::middleware('role:1')->group(function () {
-
-    // USER
-
-    Route::get('/user', [UserController::class, 'index']);
-
-    Route::get('/user/create', [UserController::class, 'create']);
-
-    Route::post('/user', [UserController::class, 'store']);
-
-    Route::get('/user/{id}/edit', [UserController::class, 'edit']);
-
-    Route::put('/user/{id}', [UserController::class, 'update']);
-
-    Route::delete('/user/{id}', [UserController::class, 'destroy']);
-
-    // ROLE
-
-    Route::get('/role', [RoleController::class, 'index']);
-
-    Route::get('/role/create', [RoleController::class, 'create']);
-
-    Route::post('/role', [RoleController::class, 'store']);
-
-    Route::get('/role/{id}/edit', [RoleController::class, 'edit']);
-
-    Route::put('/role/{id}', [RoleController::class, 'update']);
-
-    Route::delete('/role/{id}', [RoleController::class, 'destroy']);
-
-    // ADMIN CABANG
-
-    Route::get('/admincabang', [AdminCabangController::class, 'index']);
-
-    Route::get('/admincabang/create', [AdminCabangController::class, 'create']);
-
-    Route::post('/admincabang', [AdminCabangController::class, 'store']);
-
-    Route::get('/admincabang/{id}/edit', [AdminCabangController::class, 'edit']);
-
-    Route::put('/admincabang/{id}', [AdminCabangController::class, 'update']);
-
-    Route::delete('/admincabang/{id}', [AdminCabangController::class, 'destroy']);
-
-});
-
-// ======================================================
-
-// SUPER ADMIN + ADMIN CABANG
-
-// ROLE 1, 2
-
-// ======================================================
-
-Route::middleware('role:1,2')->group(function () {
-
-    // PELANGGAN
-
-    Route::get('/pelanggan', [PelangganController::class, 'index']);
-
-    Route::get('/pelanggan/create', [PelangganController::class, 'create']);
-
-    Route::post('/pelanggan', [PelangganController::class, 'store']);
-
-    Route::get('/pelanggan/{id}/edit', [PelangganController::class, 'edit']);
-
-    Route::put('/pelanggan/{id}', [PelangganController::class, 'update']);
-
-    Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy']);
-
-    // KENDARAAN
-
-    Route::get('/kendaraan', [KendaraanController::class, 'index']);
-
-    Route::get('/kendaraan/create', [KendaraanController::class, 'create']);
-
-    Route::post('/kendaraan', [KendaraanController::class, 'store']);
-
-    Route::get('/kendaraan/{id}/edit', [KendaraanController::class, 'edit']);
-
-    Route::put('/kendaraan/{id}', [KendaraanController::class, 'update']);
-
-    Route::delete('/kendaraan/{id}', [KendaraanController::class, 'destroy']);
-
-    // CABANG
-
-    Route::get('/cabang', [CabangController::class, 'index']);
-
-    Route::get('/cabang/create', [CabangController::class, 'create']);
-
-    Route::post('/cabang', [CabangController::class, 'store']);
-
-    Route::get('/cabang/{id}/edit', [CabangController::class, 'edit']);
-
-    Route::put('/cabang/{id}', [CabangController::class, 'update']);
-
-    Route::delete('/cabang/{id}', [CabangController::class, 'destroy']);
-
-    // TEKNISI
-
-    Route::get('/teknisi', [TeknisiController::class, 'index']);
-
-    Route::get('/teknisi/create', [TeknisiController::class, 'create']);
-
-    Route::post('/teknisi', [TeknisiController::class, 'store']);
-
-    Route::get('/teknisi/{id}/edit', [TeknisiController::class, 'edit']);
-
-    Route::put('/teknisi/{id}', [TeknisiController::class, 'update']);
-
-    Route::delete('/teknisi/{id}', [TeknisiController::class, 'destroy']);
-
-    // MONTIR LAPANGAN
-
-    Route::get('/montirlapangan', [MontirLapanganController::class, 'index']);
-
-    Route::get('/montirlapangan/create', [MontirLapanganController::class, 'create']);
-
-    Route::post('/montirlapangan', [MontirLapanganController::class, 'store']);
-
-    Route::get('/montirlapangan/{id}/edit', [MontirLapanganController::class, 'edit']);
-
-    Route::put('/montirlapangan/{id}', [MontirLapanganController::class, 'update']);
-
-    Route::delete('/montirlapangan/{id}', [MontirLapanganController::class, 'destroy']);
-
-    // OPERASIONAL CABANG
-
-    Route::get('/operasional', [OperasionalCabangController::class, 'index']);
-
-    Route::get('/operasional/create', [OperasionalCabangController::class, 'create']);
-
-    Route::post('/operasional', [OperasionalCabangController::class, 'store']);
-
-    Route::get('/operasional/{id}/edit', [OperasionalCabangController::class, 'edit']);
-
-    Route::put('/operasional/{id}', [OperasionalCabangController::class, 'update']);
-
-    Route::delete('/operasional/{id}', [OperasionalCabangController::class, 'destroy']);
-
-    // SPARE PART
-
-    Route::get('/sparepart', [SparePartController::class, 'index']);
-
-    Route::get('/sparepart/create', [SparePartController::class, 'create']);
-
-    Route::post('/sparepart', [SparePartController::class, 'store']);
-
-    Route::get('/sparepart/{id}/edit', [SparePartController::class, 'edit']);
-
-    Route::put('/sparepart/{id}', [SparePartController::class, 'update']);
-
-    Route::delete('/sparepart/{id}', [SparePartController::class, 'destroy']);
-
-    // KATEGORI SPARE PART
-
-    Route::get('/kategori-sparepart', [KategoriSparePartController::class, 'index']);
-
-    Route::get('/kategori-sparepart/create', [KategoriSparePartController::class, 'create']);
-
-    Route::post('/kategori-sparepart', [KategoriSparePartController::class, 'store']);
-
-    Route::get('/kategori-sparepart/{id}/edit', [KategoriSparePartController::class, 'edit']);
-
-    Route::put('/kategori-sparepart/{id}', [KategoriSparePartController::class, 'update']);
-
-    Route::delete('/kategori-sparepart/{id}', [KategoriSparePartController::class, 'destroy']);
-
-    // ORDER SPARE PART
-
-    Route::get('/order', [OrderSparePartController::class, 'index']);
-
-    Route::get('/order/create', [OrderSparePartController::class, 'create']);
-
-    Route::post('/order', [OrderSparePartController::class, 'store']);
-
-    Route::get('/order/{id}/edit', [OrderSparePartController::class, 'edit']);
-
-    Route::put('/order/{id}', [OrderSparePartController::class, 'update']);
-
-    Route::delete('/order/{id}', [OrderSparePartController::class, 'destroy']);
-
-    // ORDER DETAIL
-
-    Route::get('/orderdetail', [OrderDetailController::class, 'index']);
-
-    Route::get('/orderdetail/create', [OrderDetailController::class, 'create']);
-
-    Route::post('/orderdetail', [OrderDetailController::class, 'store']);
-
-    Route::get('/orderdetail/{id}/edit', [OrderDetailController::class, 'edit']);
-
-    Route::put('/orderdetail/{id}', [OrderDetailController::class, 'update']);
-
-    Route::delete('/orderdetail/{id}', [OrderDetailController::class, 'destroy']);
-
-    // PENGIRIMAN
-
-    Route::get('/pengiriman', [PengirimanController::class, 'index']);
-
-    Route::get('/pengiriman/create', [PengirimanController::class, 'create']);
-
-    Route::post('/pengiriman', [PengirimanController::class, 'store']);
-
-    Route::get('/pengiriman/{id}/edit', [PengirimanController::class, 'edit']);
-
-    Route::put('/pengiriman/{id}', [PengirimanController::class, 'update']);
-
-    Route::delete('/pengiriman/{id}', [PengirimanController::class, 'destroy']);
-
-    // EKSPEDISI
-
-    Route::get('/ekspedisi', [EkspedisiController::class, 'index']);
-
-    Route::get('/ekspedisi/create', [EkspedisiController::class, 'create']);
-
-    Route::post('/ekspedisi', [EkspedisiController::class, 'store']);
-
-    Route::get('/ekspedisi/{id}/edit', [EkspedisiController::class, 'edit']);
-
-    Route::put('/ekspedisi/{id}', [EkspedisiController::class, 'update']);
-
-    Route::delete('/ekspedisi/{id}', [EkspedisiController::class, 'destroy']);
-
-    // METODE PEMBAYARAN
-
-    Route::get('/metodepembayaran', [MetodePembayaranController::class, 'index']);
-
-    Route::get('/metodepembayaran/create', [MetodePembayaranController::class, 'create']);
-
-    Route::post('/metodepembayaran', [MetodePembayaranController::class, 'store']);
-
-    Route::get('/metodepembayaran/{id}/edit', [MetodePembayaranController::class, 'edit']);
-
-    Route::put('/metodepembayaran/{id}', [MetodePembayaranController::class, 'update']);
-
-    Route::delete('/metodepembayaran/{id}', [MetodePembayaranController::class, 'destroy']);
-
-    // PROMO
-
-    Route::get('/promo', [PromoController::class, 'index']);
-
-    Route::get('/promo/create', [PromoController::class, 'create']);
-
-    Route::post('/promo', [PromoController::class, 'store']);
-
-    Route::get('/promo/{id}/edit', [PromoController::class, 'edit']);
-
-    Route::put('/promo/{id}', [PromoController::class, 'update']);
-
-    Route::delete('/promo/{id}', [PromoController::class, 'destroy']);
-
-});
-
-// ======================================================
-
-// SUPER ADMIN + ADMIN CABANG + PETUGAS SERVICE
-
-// ROLE 1, 2, 3
-
-// ======================================================
-
-Route::middleware('role:1,2,3')->group(function () {
-
-    // BOOKING SERVIS
-
-    Route::get('/booking', [BookingServisController::class, 'index']);
-
-    Route::get('/booking/create', [BookingServisController::class, 'create']);
-
-    Route::post('/booking', [BookingServisController::class, 'store']);
-
-    Route::get('/booking/{id}/edit', [BookingServisController::class, 'edit']);
-
-    Route::put('/booking/{id}', [BookingServisController::class, 'update']);
-
-    Route::delete('/booking/{id}', [BookingServisController::class, 'destroy']);
-
-    // LAYANAN SERVIS UNTUK ADMIN DAN PETUGAS
-
-Route::get('/layanan', [LayananServisController::class, 'index']);
-
-Route::get('/layanan/create', [LayananServisController::class, 'create']);
-
-Route::post('/layanan', [LayananServisController::class, 'store']);
-
-Route::get('/layanan/{id}/edit', [LayananServisController::class, 'edit']);
-
-Route::put('/layanan/{id}', [LayananServisController::class, 'update']);
-
-Route::delete('/layanan/{id}', [LayananServisController::class, 'destroy']);
-    // DETAIL SERVIS
-
-    Route::get('/detailservis', [DetailServisController::class, 'index']);
-
-    Route::get('/detailservis/create', [DetailServisController::class, 'create']);
-
-    Route::post('/detailservis', [DetailServisController::class, 'store']);
-
-    Route::get('/detailservis/{id}/edit', [DetailServisController::class, 'edit']);
-
-    Route::put('/detailservis/{id}', [DetailServisController::class, 'update']);
-
-    Route::delete('/detailservis/{id}', [DetailServisController::class, 'destroy']);
-
-    // PENUGASAN TEKNISI
-
-    Route::get('/penugasan', [PenugasanTeknisiController::class, 'index']);
-
-    Route::get('/penugasan/create', [PenugasanTeknisiController::class, 'create']);
-
-    Route::post('/penugasan', [PenugasanTeknisiController::class, 'store']);
-
-    Route::get('/penugasan/{id}/edit', [PenugasanTeknisiController::class, 'edit']);
-
-    Route::put('/penugasan/{id}', [PenugasanTeknisiController::class, 'update']);
-
-    Route::delete('/penugasan/{id}', [PenugasanTeknisiController::class, 'destroy']);
-
-    // PEMBAYARAN
-
-    Route::get('/pembayaran', [PembayaranController::class, 'index']);
-
-    Route::get('/pembayaran/create', [PembayaranController::class, 'create']);
-
-    Route::post('/pembayaran', [PembayaranController::class, 'store']);
-
-    Route::get('/pembayaran/{id}/edit', [PembayaranController::class, 'edit']);
-
-    Route::put('/pembayaran/{id}', [PembayaranController::class, 'update']);
-
-    Route::delete('/pembayaran/{id}', [PembayaranController::class, 'destroy']);
-
-    // RATING
-
-    Route::get('/rating', [RatingController::class, 'index']);
-
-    Route::get('/rating/create', [RatingController::class, 'create']);
-
-    Route::post('/rating', [RatingController::class, 'store']);
-
-    Route::get('/rating/{id}/edit', [RatingController::class, 'edit']);
-
-    Route::put('/rating/{id}', [RatingController::class, 'update']);
-
-    Route::delete('/rating/{id}', [RatingController::class, 'destroy']);
-
-});
-
-// KATALOG LAYANAN UNTUK PELANGGAN (ROLE 6)
+    Route::get('/pembayaran-sparepart/{id_order}', [
+    \App\Http\Controllers\PelangganPembayaranController::class,
+    'formSparePart'
+]);
+
+Route::post('/pembayaran-sparepart/{id_order}', [
+    \App\Http\Controllers\PelangganPembayaranController::class,
+    'storeSparePart'
+]);
+
+    // Form booking khusus pelanggan
+    Route::get(
+        '/booking-pelanggan/create',
+        [PelangganBookingController::class, 'create']
+    );
+
+    // Menyimpan booking pelanggan
+    Route::post(
+        '/booking-pelanggan',
+        [PelangganBookingController::class, 'store']
+    );
+    
+    
+Route::get('/booking-pelanggan', [
+    \App\Http\Controllers\PelangganBookingController::class,
+    'index'
+]);
 
 Route::middleware('role:6')->group(function () {
-    Route::get('/layanan-pelanggan', [LayananServisController::class, 'index']);
+    Route::get('/pembayaran-pelanggan', [
+        PelangganPembayaranController::class,
+        'index'
+    ]);
 });
-
-// ======================================================
-
-// SUPER ADMIN + ADMIN CABANG + TEKNISI + MONTIR
-
-// ROLE 1, 2, 4, 5
-
-// ======================================================
-
-Route::middleware('role:1,2,4,5')->group(function () {
-
-    // HOME SERVIS
-
-    Route::get('/homeservice', [HomeServisController::class, 'index']);
-
-    Route::get('/homeservice/create', [HomeServisController::class, 'create']);
-
-    Route::post('/homeservice', [HomeServisController::class, 'store']);
-
-    Route::get('/homeservice/{id}/edit', [HomeServisController::class, 'edit']);
-
-    Route::put('/homeservice/{id}', [HomeServisController::class, 'update']);
-
-    Route::delete('/homeservice/{id}', [HomeServisController::class, 'destroy']);
 
 });
 
-// ======================================================
+Route::get('/kendaraan-pelanggan', [
+    PelangganKendaraanController::class, 'index'
+]);
 
-// SUPER ADMIN + TEKNISI + MONTIR
+Route::get('/kendaraan-pelanggan/create', [
+    PelangganKendaraanController::class, 'create'
+]);
 
-// ROLE 1, 4, 5
+Route::post('/kendaraan-pelanggan', [
+    PelangganKendaraanController::class, 'store'
+]);
 
-// ======================================================
+Route::delete('/kendaraan-pelanggan/{id}', [
+    PelangganKendaraanController::class, 'destroy'
+]);
 
-Route::middleware('role:1,4,5')->group(function () {
+// PEMBAYARAN PELANGGAN
+Route::middleware('role:6')->group(function () {
+    Route::get(
+        '/pembayaran-pelanggan',
+        [PelangganPembayaranController::class, 'index']
+    );
 
-    // SPARE PART UNTUK TEKNISI/MONTIR
+    Route::post(
+        '/pembayaran-pelanggan/{id_booking}',
+        [PelangganPembayaranController::class, 'store']
+    );
+});
 
-    // Hanya lihat data
 
-    Route::get('/sparepart/lihat', [SparePartController::class, 'index']);
+Route::middleware('role:1,2,3')->group(function () {
+    Route::get(
+        '/pengelolaan-booking',
+        [\App\Http\Controllers\PengelolaanBookingController::class, 'index']
+    )->name('pengelolaan-booking.index');
+
+    Route::put(
+        '/pengelolaan-booking/{id}',
+        [\App\Http\Controllers\PengelolaanBookingController::class, 'update']
+    )->name('pengelolaan-booking.update');
+});
+
+
+Route::middleware('role:1')->group(function () {
+    Route::get('/dashboard-super-admin', function () {
+        return view('dashboard-super-admin');
+    });
+});
+
+// =====================================================
+// HALAMAN LAYANAN SERVIS KHUSUS PELANGGAN
+// =====================================================
+
+Route::middleware('role:6')->group(function () {
+    Route::get('/layanan-pelanggan', function () {
+        $layanans = \App\Models\LayananServis::orderBy('nama_layanan')
+            ->get();
+
+        return view('pelanggan.layanan.index', compact('layanans'));
+    });
+});
+
+
+Route::middleware('role:6')->group(function () {
+    Route::get(
+        '/order-pelanggan',
+        [OrderSparePartController::class, 'pesananPelanggan']
+    );
+
+    
+Route::get('/pembayaran-sparepart/{id_order}', [
+    \App\Http\Controllers\PelangganPembayaranController::class,
+    'formSparePart'
+]);
+
+Route::post('/pembayaran-sparepart/{id_order}', [
+    \App\Http\Controllers\PelangganPembayaranController::class,
+    'storeSparePart'
+]);
 
 });
 
-// ======================================================
+// RATING DAN ULASAN KHUSUS PELANGGAN
+Route::middleware('role:6')->group(function () {
+    Route::get('/rating-pelanggan', [
+        PelangganRatingController::class,
+        'index'
+    ]);
 
-// TEKNISI + MONTIR
+    Route::post('/rating-pelanggan', [
+        PelangganRatingController::class,
+        'store'
+    ]);
 
-// ROLE 1, 4, 5
-
-// ======================================================
-
-Route::middleware('role:1,4,5')->group(function () {
-
-    // PENUGASAN - lihat data
-
-    Route::get('/penugasan/lihat', [PenugasanTeknisiController::class, 'index']);
-
+    Route::delete('/rating-pelanggan/{id}', [
+        PelangganRatingController::class,
+        'destroy'
+    ]);
 });
 
-// sementara
 
-Route::get('/', function () {
+ // KATALOG, KERANJANG, DAN CHECKOUT SPARE PART PELANGGAN
+Route::middleware('role:6')->group(function () {
+    Route::get('/sparepart-pelanggan', [
+        PelangganSparePartController::class,
+        'index'
+    ]);
 
-    return redirect('/login');
+    Route::post('/keranjang-sparepart', [
+        PelangganSparePartController::class,
+        'tambahKeranjang'
+    ]);
 
+    Route::get('/keranjang-sparepart', [
+        PelangganSparePartController::class,
+        'keranjang'
+    ]);
+
+    Route::delete('/keranjang-sparepart/{id}', [
+        PelangganSparePartController::class,
+        'hapusKeranjang'
+    ]);
+
+    Route::get('/checkout-sparepart', [
+        PelangganSparePartController::class,
+        'checkout'
+    ]);
+
+    Route::post('/checkout-sparepart', [
+        PelangganSparePartController::class,
+        'prosesCheckout'
+    ]);
+
+    Route::get('/checkout-sparepart/berhasil/{id}', [
+        PelangganSparePartController::class,
+        'pesananBerhasil'
+    ]);
+});
+
+
+
+
+// ADMIN - PENGELOLAAN PESANAN SPARE PART
+Route::middleware('role:1,2,9')->group(function () {
+    Route::get(
+        '/admin-pesanan-sparepart',
+        [AdminPesananSparePartController::class, 'index']
+    );
+
+    Route::put(
+        '/admin-pesanan-sparepart/{id}/status',
+        [AdminPesananSparePartController::class, 'updateStatus']
+    );
+});
+
+/*
+|--------------------------------------------------------------------------
+| CRUD PENGGUNA - KHUSUS SUPER ADMIN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:1')->group(function () {
+    Route::get('/user', [UserController::class, 'index'])
+        ->name('user.index');
+
+    Route::get('/user/create', [UserController::class, 'create'])
+        ->name('user.create');
+
+    Route::post('/user', [UserController::class, 'store'])
+        ->name('user.store');
+
+    Route::get('/user/{id}/edit', [UserController::class, 'edit'])
+        ->name('user.edit');
+
+    Route::put('/user/{id}', [UserController::class, 'update'])
+        ->name('user.update');
+
+    Route::delete('/user/{id}', [UserController::class, 'destroy'])
+        ->name('user.destroy');
+});
+
+// CRUD ROLE - khusus Super Admin
+Route::middleware('role:1')->group(function () {
+    Route::get('/role', [RoleController::class, 'index'])->name('role.index');
+    Route::get('/role/create', [RoleController::class, 'create'])->name('role.create');
+    Route::post('/role', [RoleController::class, 'store'])->name('role.store');
+    Route::get('/role/{id}/edit', [RoleController::class, 'edit'])->name('role.edit');
+    Route::put('/role/{id}', [RoleController::class, 'update'])->name('role.update');
+    Route::delete('/role/{id}', [RoleController::class, 'destroy'])->name('role.destroy');
+}); 
+
+// CRUD ADMIN CABANG - khusus Super Admin
+Route::middleware('role:1')->group(function () {
+    Route::get('/admincabang', [AdminCabangController::class, 'index'])
+        ->name('admincabang.index');
+
+    Route::get('/admincabang/create', [AdminCabangController::class, 'create'])
+        ->name('admincabang.create');
+
+    Route::post('/admincabang', [AdminCabangController::class, 'store'])
+        ->name('admincabang.store');
+
+    Route::get('/admincabang/{id}/edit', [AdminCabangController::class, 'edit'])
+        ->name('admincabang.edit');
+
+    Route::put('/admincabang/{id}', [AdminCabangController::class, 'update'])
+        ->name('admincabang.update');
+
+    Route::delete('/admincabang/{id}', [AdminCabangController::class, 'destroy'])
+        ->name('admincabang.destroy');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| CRUD CABANG
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:1')->group(function () {
+    Route::get('/cabang', [CabangController::class, 'index'])
+        ->name('cabang.index');
+
+    Route::get('/cabang/create', [CabangController::class, 'create'])
+        ->name('cabang.create');
+
+    Route::post('/cabang', [CabangController::class, 'store'])
+        ->name('cabang.store');
+
+    Route::get('/cabang/{id}/edit', [CabangController::class, 'edit'])
+        ->name('cabang.edit');
+
+    Route::put('/cabang/{id}', [CabangController::class, 'update'])
+        ->name('cabang.update');
+
+    Route::delete('/cabang/{id}', [CabangController::class, 'destroy'])
+        ->name('cabang.destroy');
+});
+
+Route::middleware('role:1,2')->group(function () {
+    Route::get('/operasional', [OperasionalCabangController::class, 'index'])
+        ->name('operasional.index');
+
+    Route::get('/operasional/create', [OperasionalCabangController::class, 'create'])
+        ->name('operasional.create');
+
+    Route::post('/operasional', [OperasionalCabangController::class, 'store'])
+        ->name('operasional.store');
+
+    Route::get('/operasional/{id}/edit', [OperasionalCabangController::class, 'edit'])
+        ->name('operasional.edit');
+
+    Route::put('/operasional/{id}', [OperasionalCabangController::class, 'update'])
+        ->name('operasional.update');
+
+    Route::delete('/operasional/{id}', [OperasionalCabangController::class, 'destroy'])
+        ->name('operasional.destroy');
+});
+
+
+Route::middleware('role:1,2,3')->group(function () {
+    Route::get('/pelanggan', [PelangganController::class, 'index'])
+        ->name('pelanggan.index');
+
+    Route::get('/pelanggan/create', [PelangganController::class, 'create'])
+        ->name('pelanggan.create');
+
+    Route::post('/pelanggan', [PelangganController::class, 'store'])
+        ->name('pelanggan.store');
+
+    Route::get('/pelanggan/{id}/edit', [PelangganController::class, 'edit'])
+        ->name('pelanggan.edit');
+
+    Route::put('/pelanggan/{id}', [PelangganController::class, 'update'])
+        ->name('pelanggan.update');
+
+    Route::delete('/pelanggan/{id}', [PelangganController::class, 'destroy'])
+        ->name('pelanggan.destroy');
+});
+
+
+Route::middleware('role:1,2,3')->group(function () {
+    Route::get('/kendaraan', [KendaraanController::class, 'index'])
+        ->name('kendaraan.index');
+
+    Route::get('/kendaraan/create', [KendaraanController::class, 'create'])
+        ->name('kendaraan.create');
+
+    Route::post('/kendaraan', [KendaraanController::class, 'store'])
+        ->name('kendaraan.store');
+
+    Route::get('/kendaraan/{id}/edit', [KendaraanController::class, 'edit'])
+        ->name('kendaraan.edit');
+
+    Route::put('/kendaraan/{id}', [KendaraanController::class, 'update'])
+        ->name('kendaraan.update');
+
+    Route::delete('/kendaraan/{id}', [KendaraanController::class, 'destroy'])
+        ->name('kendaraan.destroy');
+});
+
+Route::redirect('/booking', '/pengelolaan-booking')->name('booking.redirect');
+
+// LAYANAN SERVIS
+Route::middleware('role:1,2,3')->group(function () {
+    Route::resource('/layanan', \App\Http\Controllers\LayananServisController::class)
+        ->except(['show']);
+});
+
+// DETAIL SERVIS
+Route::middleware('role:1,2,3')->group(function () {
+    Route::resource(
+        '/detailservis',
+        \App\Http\Controllers\DetailServisController::class
+    )->except(['show']);
+});
+
+// PENUGASAN TEKNISI
+Route::middleware('role:1,2,3')->group(function () {
+    Route::resource(
+        '/penugasan',
+        \App\Http\Controllers\PenugasanTeknisiController::class
+    )->except(['show']);
+});
+
+// DATA TEKNISI
+Route::middleware('role:1,2')->group(function () {
+    Route::resource(
+        '/teknisi',
+        \App\Http\Controllers\TeknisiController::class
+    )->except(['show']);
+});
+
+// MONTIR LAPANGAN
+Route::middleware('role:1,2')->group(function () {
+    Route::resource(
+        '/montirlapangan',
+        \App\Http\Controllers\MontirLapanganController::class
+    )->except(['show']);
+});
+
+// KATEGORI SPAREPART
+Route::middleware('role:1,2,9')->group(function () {
+    Route::resource(
+        '/kategori-sparepart',
+        KategoriSparePartController::class
+    )->except(['show']);
+});
+
+// DATA SPAREPART
+Route::middleware('role:1,2,9')->group(function () {
+    Route::resource(
+        '/sparepart',
+        SparePartController::class
+    )->except(['show']);
+});
+
+// HOME SERVICE
+Route::middleware('role:1,2')->group(function () {
+    Route::resource(
+        '/homeservice',
+        \App\Http\Controllers\HomeServisController::class
+    )->except(['show']);
+});
+
+
+ // ORDER SPAREPART
+Route::middleware('role:1,2,9')->group(function () {
+    Route::resource(
+        '/order',
+        OrderSparePartController::class
+    )->except(['show']);
+});
+
+// ORDER DETAIL
+Route::middleware('role:1,2,9')->group(function () {
+    Route::resource(
+        '/orderdetail',
+        OrderDetailController::class
+    )->except(['show']);
+});
+
+// PENGIRIMAN
+Route::middleware('role:1,2,10')->group(function () {
+    Route::resource(
+        '/pengiriman',
+        PengirimanController::class
+    )->except(['show']);
+});
+
+// EKSPEDISI
+Route::middleware('role:1,2,10')->group(function () {
+    Route::resource(
+        '/ekspedisi',
+        EkspedisiController::class
+    )->except(['show']);
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| PEMBAYARAN ADMIN DAN PETUGAS SERVICE
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:1,3')->group(function () {
+    Route::resource(
+        '/pembayaran',
+        \App\Http\Controllers\PembayaranController::class
+    )->except(['show']);
+});
+
+// METODE PEMBAYARAN
+Route::resource(
+    '/metodepembayaran',
+    \App\Http\Controllers\MetodePembayaranController::class
+)->except(['show']);
+
+// PROMO
+Route::resource(
+    '/promo',
+    \App\Http\Controllers\PromoController::class
+)->except(['show']);
+
+// RATING ADMIN
+Route::resource(
+    '/rating',
+    \App\Http\Controllers\RatingController::class
+)->except(['show']);
+
+// DASHBOARD KHUSUS PETUGAS SERVICE
+Route::middleware('role:3')->group(function () {
+    Route::get('/dashboard-petugas-service', function () {
+        return view('dashboard-petugas-service');
+    });
+});
+
+
+    // PEMBAYARAN HOME SERVICE
+    Route::get(
+        '/pembayaran-home-service',
+        [PembayaranHomeServisController::class, 'index']
+    )->name('pembayaran-home-service.index');
+
+    Route::get(
+        '/pembayaran-home-service/create',
+        [PembayaranHomeServisController::class, 'create']
+    )->name('pembayaran-home-service.create');
+
+    Route::post(
+        '/pembayaran-home-service',
+        [PembayaranHomeServisController::class, 'store']
+    )->name('pembayaran-home-service.store');
+
+
+// DASHBOARD KHUSUS ADMIN CABANG
+Route::middleware('role:2')->group(function () {
+    Route::get('/dashboard-admin-cabang', function () {
+        return view('dashboard-admin-cabang');
+    });
+});
+
+
+ // DASHBOARD KHUSUS TEKNISI
+Route::middleware('role:4')->group(function () {
+    Route::get(
+        '/dashboard-teknisi',
+        [\App\Http\Controllers\DashboardTeknisiController::class, 'index']
+    )->name('dashboard.teknisi');
+
+    Route::put(
+        '/teknisi/penugasan/{id}/status',
+        [\App\Http\Controllers\DashboardTeknisiController::class, 'updateStatus']
+    )->name('teknisi.penugasan.status');
+});
+
+Route::get(
+    '/teknisi/rating',
+    [\App\Http\Controllers\TeknisiRatingController::class, 'index']
+)->name('teknisi.rating.index');
+
+// DASHBOARD DAN TUGAS MONTIR LAPANGAN
+
+Route::middleware('role:5')->group(function () {
+    Route::get(
+        '/dashboard-montir-lapangan',
+        [DashboardMontirLapanganController::class, 'index']
+    )->name('montir-lapangan.dashboard');
+
+    Route::get(
+        '/montir-lapangan/tugas',
+        [DashboardMontirLapanganController::class, 'tugas']
+    )->name('montir-lapangan.tugas.index');
+
+    Route::put(
+        '/montir-lapangan/tugas/{id}/status',
+        [DashboardMontirLapanganController::class, 'updateStatus']
+    )->name('montir-lapangan.tugas.status');
+});
+
+// DASHBOARD PETUGAS SPARE PART
+Route::middleware('role:9')->group(function () {
+    Route::get('/dashboard-petugas-sparepart', function () {
+        return view('dashboard-petugas-sparepart');
+    })->name('dashboard.petugas-sparepart');
+});
+
+// DASHBOARD PETUGAS PENGIRIMAN
+Route::middleware('role:10')->group(function () {
+    Route::get('/dashboard-petugas-pengiriman', function () {
+        return view('dashboard-petugas-pengiriman');
+    })->name('dashboard.petugas-pengiriman');
 });
