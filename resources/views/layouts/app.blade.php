@@ -160,6 +160,19 @@
                     </a>
                 </div>
 
+                
+<div class="nav-item">
+    <a href="/laporan-pembayaran"
+       class="nav-link {{ request()->is('laporan-pembayaran*') ? 'active' : '' }}"
+       data-tooltip="Laporan Pembayaran">
+        <span class="nav-icon">
+            <i class="fas fa-file-pdf"></i>
+        </span>
+        <span class="nav-text">Laporan Pembayaran</span>
+    </a>
+</div>
+
+
             @elseif ((int) session('role_id') === 2)
                 {{-- SIDEBAR KHUSUS ADMIN CABANG --}}
                 <div class="nav-item">
@@ -522,6 +535,19 @@
                     </div>
                 </div>
             </div>
+
+            
+<div class="nav-item">
+    <a href="/laporan-pembayaran"
+       class="nav-link {{ request()->is('laporan-pembayaran*') ? 'active' : '' }}"
+       data-tooltip="Laporan Pembayaran">
+        <span class="nav-icon">
+            <i class="fas fa-file-pdf"></i>
+        </span>
+        <span class="nav-text">Laporan Pembayaran</span>
+    </a>
+</div>
+
             <div class="nav-item">
                 <a href="/promo"
                    class="nav-link {{ str_starts_with($pathAktif, 'promo') ? 'active' : '' }}"

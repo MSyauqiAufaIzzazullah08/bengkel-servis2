@@ -15,6 +15,7 @@ class Rating extends Model
         'id_pelanggan',
         'id_booking',
         'id_order',
+        'id_home_service',
         'nilai',
         'ulasan',
         'tanggal',
@@ -44,6 +45,15 @@ class Rating extends Model
             OrderSparePart::class,
             'id_order',
             'id_order'
+        );
+    }
+
+    public function homeService()
+    {
+        return $this->belongsTo(
+            HomeServis::class,
+            'id_home_service',
+            'id_home_service'
         );
     }
 }

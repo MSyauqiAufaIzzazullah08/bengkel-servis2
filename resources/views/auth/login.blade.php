@@ -18,7 +18,9 @@
             --border: #DCE4EF;
         }
 
-        * { box-sizing: border-box; }
+        * {
+            box-sizing: border-box;
+        }
 
         body {
             margin: 0;
@@ -46,23 +48,35 @@
             text-decoration: none;
         }
 
-        .logo span { color: var(--orange); }
+        .logo span {
+            color: var(--orange);
+        }
 
         .header-label {
             color: var(--muted);
             font-size: 13px;
         }
 
+        /* BACKGROUND FOTO BENGKEL */
         main {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 45px 18px;
-            background:
-                radial-gradient(circle at 10% 15%, #E2EAF7 0, transparent 30%),
-                radial-gradient(circle at 90% 85%, #FFF0D3 0, transparent 27%),
-                var(--background);
+
+            background-color: #eaf2fa;
+            background-image:
+                linear-gradient(
+                    110deg,
+                    rgba(231, 242, 255, 0.78),
+                    rgba(255, 249, 237, 0.72)
+                ),
+                url("{{ asset('assets/images/bengkel3.jpg') }}");
+
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
 
         .login-layout {
@@ -93,7 +107,7 @@
             position: absolute;
             width: 220px;
             height: 220px;
-            border: 30px solid rgba(245,166,35,.15);
+            border: 30px solid rgba(245, 166, 35, .15);
             border-radius: 50%;
             right: -100px;
             bottom: -100px;
@@ -122,7 +136,7 @@
         }
 
         .intro p {
-            color: rgba(255,255,255,.83);
+            color: rgba(255, 255, 255, .83);
             font-size: 14px;
             line-height: 1.9;
             position: relative;
@@ -133,7 +147,7 @@
             margin-top: 25px;
             padding: 13px 15px;
             border-left: 3px solid var(--orange);
-            background: rgba(255,255,255,.08);
+            background: rgba(255, 255, 255, .08);
             border-radius: 5px;
             font-size: 12px;
             line-height: 1.7;
@@ -173,7 +187,9 @@
             line-height: 1.7;
         }
 
-        .group { margin-bottom: 18px; }
+        .group {
+            margin-bottom: 18px;
+        }
 
         label {
             display: block;
@@ -195,11 +211,12 @@
         }
 
         input:focus {
-            outline: 3px solid rgba(245,166,35,.2);
+            outline: 3px solid rgba(245, 166, 35, .2);
             border-color: var(--orange);
         }
 
-        button, .register-button {
+        button,
+        .register-button {
             display: block;
             width: 100%;
             padding: 13px;
@@ -220,7 +237,7 @@
 
         button:hover {
             background: var(--navy-light);
-            box-shadow: 0 5px 14px rgba(16,43,85,.18);
+            box-shadow: 0 5px 14px rgba(16, 43, 85, .18);
         }
 
         .register-button {
@@ -230,7 +247,9 @@
             background: var(--orange-light);
         }
 
-        .register-button:hover { background: #FFE5B0; }
+        .register-button:hover {
+            background: #FFE5B0;
+        }
 
         .message {
             padding: 12px;
@@ -261,7 +280,9 @@
             font-size: 13px;
         }
 
-        .back-link:hover { color: var(--navy); }
+        .back-link:hover {
+            color: var(--navy);
+        }
 
         footer {
             padding: 20px;
@@ -273,14 +294,37 @@
         }
 
         @media (max-width: 700px) {
-            header { padding: 18px 5%; }
-            .header-label { display: none; }
-            main { padding: 25px 14px; }
-            .login-layout { grid-template-columns: 1fr; }
-            .intro { padding: 27px; }
-            .intro h2 { font-size: 24px; }
-            .intro-note { margin-top: 12px; }
-            .card { padding: 28px 23px; }
+            header {
+                padding: 18px 5%;
+            }
+
+            .header-label {
+                display: none;
+            }
+
+            main {
+                padding: 25px 14px;
+            }
+
+            .login-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .intro {
+                padding: 27px;
+            }
+
+            .intro h2 {
+                font-size: 24px;
+            }
+
+            .intro-note {
+                margin-top: 12px;
+            }
+
+            .card {
+                padding: 28px 23px;
+            }
         }
     </style>
 </head>
@@ -293,14 +337,18 @@
 
 <main>
     <div class="login-layout">
+
         <section class="intro">
             <div class="intro-icon">🔧</div>
+
             <h2>Servis Kendaraan Jadi Lebih Mudah</h2>
+
             <p>
                 Selamat datang di BengkelServis. Kelola kebutuhan servis
                 kendaraan, booking layanan, dan informasi transaksi
                 melalui satu sistem terintegrasi.
             </p>
+
             <div class="intro-note">
                 <strong>Praktis, aman, dan terorganisasi.</strong><br>
                 Masuk menggunakan akun yang sudah terdaftar.
@@ -367,6 +415,7 @@
 
             <a href="/" class="back-link">← Kembali ke halaman utama</a>
         </section>
+
     </div>
 </main>
 

@@ -131,7 +131,6 @@
             font-size: 14px;
         }
 
-        /* RINGKASAN */
         .summary {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -202,7 +201,6 @@
             font-size: 12px;
         }
 
-        /* KARTU BOOKING */
         .booking-list {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -243,6 +241,28 @@
             font-size: 19px;
             line-height: 1.4;
             overflow-wrap: anywhere;
+        }
+
+        .badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .type-badge {
+            display: inline-block;
+            background: #E8EEF8;
+            color: var(--navy);
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .type-home {
+            background: #FFF2D9;
+            color: #8A5700;
         }
 
         .status {
@@ -344,7 +364,6 @@
             overflow-wrap: anywhere;
         }
 
-        /* BOOKING KOSONG */
         .empty {
             grid-column: 1 / -1;
             text-align: center;
@@ -385,10 +404,7 @@
         }
 
         @media (max-width: 800px) {
-            .summary {
-                grid-template-columns: 1fr;
-            }
-
+            .summary,
             .booking-list {
                 grid-template-columns: 1fr;
             }
@@ -442,13 +458,16 @@
 </header>
 
 <main>
-    <div class="breadcrumb">Beranda / Booking Servis / Riwayat Booking</div>
+    <div class="breadcrumb">
+        Beranda / Booking Servis / Riwayat Pengajuan
+    </div>
 
     <div class="heading">
         <div>
             <h1>Booking Servis Saya</h1>
             <p class="subtitle">
-                Pantau jadwal servis, kendaraan, cabang bengkel, dan status booking kamu.
+                Pantau riwayat servis bengkel dan Home Service,
+                kendaraan, jadwal, serta status pengajuan kamu.
             </p>
         </div>
 
@@ -463,13 +482,38 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="message">
+            {{ $errors->first() }}
+        </div>
+    @endif
+
+    @php
+        $totalPengajuan = $bookings->count();
+
+        $totalMenunggu = $bookings->filter(function ($item) {
+            return in_array(
+                strtolower(trim($item->status ?? '')),
+                ['pending', 'requested']
+            );
+        })->count();
+
+        $totalSelesai = $bookings->filter(function ($item) {
+            return in_array(
+                strtolower(trim($item->status ?? '')),
+                ['completed', 'complete', 'selesai', 'lunas', 'paid']
+            );
+        })->count();
+    @endphp
+
     <section class="summary">
         <article class="summary-card">
             <div class="summary-top">
-                <p class="summary-label">Total Booking</p>
+                <p class="summary-label">Total Pengajuan</p>
                 <div class="summary-icon">📋</div>
             </div>
-            <div class="summary-number">{{ $bookings->count() }}</div>
+
+            <div class="summary-number">{{ $totalPengajuan }}</div>
             <small>Seluruh pengajuan servis kamu</small>
         </article>
 
@@ -478,28 +522,27 @@
                 <p class="summary-label">Menunggu Konfirmasi</p>
                 <div class="summary-icon">⏳</div>
             </div>
-            <div class="summary-number">
-                {{ $bookings->filter(fn($b) => strtolower(trim($b->status ?? 'pending')) === 'pending')->count() }}
-            </div>
-            <small>Booking yang masih menunggu</small>
+
+            <div class="summary-number">{{ $totalMenunggu }}</div>
+            <small>Pengajuan yang masih menunggu</small>
         </article>
 
         <article class="summary-card">
             <div class="summary-top">
-                <p class="summary-label">Selesai</p>
+                <p class="summary-label">Selesai / Lunas</p>
                 <div class="summary-icon">✅</div>
             </div>
-            <div class="summary-number">
-                {{ $bookings->filter(fn($b) => in_array(strtolower(trim($b->status ?? '')), ['completed', 'complete', 'selesai']))->count() }}
-            </div>
-            <small>Booking dengan status selesai</small>
+
+            <div class="summary-number">{{ $totalSelesai }}</div>
+            <small>Pengajuan yang selesai atau lunas</small>
         </article>
     </section>
 
     <div class="section-heading">
-        <h2 class="section-title">Riwayat Booking</h2>
+        <h2 class="section-title">Riwayat Pengajuan Servis</h2>
+
         <span class="section-caption">
-            {{ $bookings->count() }} booking tercatat
+            {{ $totalPengajuan }} pengajuan tercatat
         </span>
     </div>
 
@@ -509,36 +552,71 @@
                 $status = strtolower(trim($booking->status ?? 'pending'));
 
                 $statusClass = match ($status) {
-                    'pending' => 'status-pending',
-                    'confirmed', 'confirm', 'approved', 'disetujui' => 'status-confirmed',
-                    'in progress', 'in_progress', 'processing', 'diproses' => 'status-progress',
-                    'completed', 'complete', 'selesai' => 'status-completed',
-                    'paid', 'lunas' => 'status-paid',
-                    'cancelled', 'canceled', 'dibatalkan' => 'status-cancelled',
+                    'pending', 'requested' => 'status-pending',
+
+                    'confirmed', 'confirm', 'approved', 'disetujui'
+                        => 'status-confirmed',
+
+                    'in progress', 'in_progress', 'processing', 'diproses'
+                        => 'status-progress',
+
+                    'completed', 'complete', 'selesai'
+                        => 'status-completed',
+
+                    'paid', 'lunas'
+                        => 'status-paid',
+
+                    'cancelled', 'canceled', 'dibatalkan'
+                        => 'status-cancelled',
+
                     default => 'status-pending',
                 };
 
                 $statusLabel = match ($status) {
-                    'pending' => 'Menunggu Konfirmasi',
-                    'confirmed', 'confirm', 'approved', 'disetujui' => 'Dikonfirmasi',
-                    'in progress', 'in_progress', 'processing', 'diproses' => 'Sedang Diproses',
-                    'completed', 'complete', 'selesai' => 'Selesai',
-                    'paid', 'lunas' => 'Lunas',
-                    'cancelled', 'canceled', 'dibatalkan' => 'Dibatalkan',
+                    'pending', 'requested' => 'Menunggu Konfirmasi',
+
+                    'confirmed', 'confirm', 'approved', 'disetujui'
+                        => 'Dikonfirmasi',
+
+                    'in progress', 'in_progress', 'processing', 'diproses'
+                        => 'Sedang Diproses',
+
+                    'completed', 'complete', 'selesai'
+                        => 'Selesai',
+
+                    'paid', 'lunas'
+                        => 'Lunas',
+
+                    'cancelled', 'canceled', 'dibatalkan'
+                        => 'Dibatalkan',
+
                     default => ucfirst($booking->status ?? 'Pending'),
                 };
+
+                $isHomeService =
+                    ($booking->jenis_pengajuan ?? '') === 'Home Service';
             @endphp
 
             <article class="booking-card">
                 <div class="booking-top">
                     <div>
                         <p class="booking-id">
-                            Kode booking #{{ $booking->id_booking }}
+                            @if ($isHomeService)
+                                Kode Home Service #{{ $booking->id_booking }}
+                            @else
+                                Kode booking #{{ $booking->id_booking }}
+                            @endif
                         </p>
 
                         <h3 class="booking-title">
                             {{ $booking->nama_layanan ?? 'Layanan tidak tersedia' }}
                         </h3>
+
+                        <div class="badges">
+                            <span class="type-badge {{ $isHomeService ? 'type-home' : '' }}">
+                                {{ $booking->jenis_pengajuan ?? 'Servis Bengkel' }}
+                            </span>
+                        </div>
                     </div>
 
                     <span class="status {{ $statusClass }}">
@@ -549,10 +627,12 @@
                 <div class="details">
                     <div>
                         <p class="detail-label">🚘 Kendaraan</p>
+
                         <p class="detail-value">
                             {{ $booking->merk ?? '-' }}
                             {{ $booking->model ?? '' }}
                         </p>
+
                         <p class="detail-label" style="margin-top:5px">
                             {{ $booking->nopol ?? 'Nomor polisi tidak tersedia' }}
                         </p>
@@ -560,6 +640,7 @@
 
                     <div>
                         <p class="detail-label">🏢 Cabang Bengkel</p>
+
                         <p class="detail-value">
                             {{ $booking->nama_cabang ?? 'Cabang tidak tersedia' }}
                         </p>
@@ -567,28 +648,47 @@
 
                     <div>
                         <p class="detail-label">📅 Tanggal Servis</p>
+
                         <p class="detail-value">
-                            {{ \Carbon\Carbon::parse($booking->tanggal_booking)->translatedFormat('d F Y') }}
+                            @if (!empty($booking->tanggal_booking))
+                                {{ \Carbon\Carbon::parse($booking->tanggal_booking)->translatedFormat('d F Y') }}
+                            @else
+                                -
+                            @endif
                         </p>
                     </div>
 
                     <div>
-                        <p class="detail-label">🕒 Waktu Servis</p>
-                        <p class="detail-value">
-                            {{ substr($booking->waktu_booking ?? '00:00', 0, 5) }} WIB
-                        </p>
+                        @if ($isHomeService)
+                            <p class="detail-label">🏠 Alamat Home Service</p>
+
+                            <p class="detail-value">
+                                {{ $booking->alamat_home_service ?? '-' }}
+                            </p>
+                        @else
+                            <p class="detail-label">🕒 Waktu Servis</p>
+
+                            <p class="detail-value">
+                                {{ substr($booking->waktu_booking ?? '00:00', 0, 5) }}
+                                WIB
+                            </p>
+                        @endif
                     </div>
 
                     <div>
                         <p class="detail-label">💰 Harga Layanan</p>
+
                         <p class="detail-value price">
                             Rp {{ number_format((float) ($booking->harga ?? 0), 0, ',', '.') }}
                         </p>
                     </div>
 
                     <div>
-                        <p class="detail-label">Status Booking</p>
-                        <p class="detail-value">{{ $statusLabel }}</p>
+                        <p class="detail-label">Status Pengajuan</p>
+
+                        <p class="detail-value">
+                            {{ $statusLabel }}
+                        </p>
                     </div>
                 </div>
 
@@ -599,13 +699,16 @@
                     </div>
                 @endif
             </article>
+
         @empty
             <div class="empty">
                 <div class="empty-icon">🛠️</div>
-                <h2>Belum Ada Booking Servis</h2>
+
+                <h2>Belum Ada Pengajuan Servis</h2>
+
                 <p>
-                    Kamu belum mempunyai booking servis.<br>
-                    Pilih kendaraan, cabang bengkel, dan layanan untuk memulai.
+                    Kamu belum mempunyai booking bengkel atau Home Service.<br>
+                    Pilih layanan dan buat pengajuan servis pertamamu.
                 </p>
 
                 <a class="btn" href="/booking-pelanggan/create">

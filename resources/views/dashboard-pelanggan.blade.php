@@ -207,10 +207,22 @@
             font-weight: 700;
         }
 
+        /* BACKGROUND FOTO DASHBOARD */
         .main {
             flex: 1;
             min-width: 0;
             padding: 32px;
+            background-color: #F4F7FC;
+            background-image:
+                linear-gradient(
+                    rgba(244, 247, 252, 0.88),
+                    rgba(244, 247, 252, 0.88)
+                ),
+                url("{{ asset('assets/images/bengkel3.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
         }
 
         .breadcrumb {
@@ -531,6 +543,7 @@
 
             .main {
                 padding: 22px 16px;
+                background-attachment: scroll;
             }
 
             .page-heading {
@@ -578,6 +591,7 @@
             <div class="avatar">
                 {{ strtoupper(substr(session('user_nama', 'P'), 0, 1)) }}
             </div>
+
             <div class="profile-info">
                 <div class="profile-name">
                     {{ session('user_nama', 'Pelanggan') }}
@@ -612,18 +626,21 @@
 
         <a href="/booking-pelanggan/create" class="nav-link">
             <span class="nav-icon">📅</span> Booking Servis Baru
-        </a>
+        </a>  
+<!-- MENU HOME SERVICE -->
+<a href="/home-service-pelanggan" class="nav-link">
+    <span class="nav-icon">🏠</span> Home Service
+</a>
+
 
         <a href="/kendaraan-pelanggan" class="nav-link">
             <span class="nav-icon">🚗</span> Kendaraan Saya
         </a>
 
-        <!-- MENU BARU: KATALOG SPARE PART -->
         <a href="/sparepart-pelanggan" class="nav-link">
             <span class="nav-icon">🔩</span> Katalog Spare Part
         </a>
 
-        <!-- MENU RIWAYAT PESANAN TETAP DIPERTAHANKAN -->
         <a href="/order-pelanggan" class="nav-link">
             <span class="nav-icon">🛒</span> Pesanan Spare Part
         </a>
@@ -672,6 +689,7 @@
                     Buat Booking Sekarang →
                 </a>
             </div>
+
             <div class="banner-art">🚘</div>
         </section>
 
@@ -732,6 +750,17 @@
                 </p>
                 <span class="service-link">Buat booking →</span>
             </a>
+<!-- KARTU HOME SERVICE -->
+<a href="/home-service-pelanggan" class="service-card">
+    <div class="service-icon">🏠</div>
+    <h3>Home Service</h3>
+    <p>
+        Pesan layanan servis kendaraan di lokasi kamu
+        tanpa perlu datang langsung ke bengkel.
+    </p>
+    <span class="service-link">Ajukan Home Service →</span>
+</a>
+
 
             <a href="/booking-pelanggan" class="service-card">
                 <div class="service-icon">📋</div>
@@ -751,7 +780,6 @@
                 <span class="service-link">Lihat kendaraan →</span>
             </a>
 
-            <!-- KARTU BARU: BELANJA SPARE PART -->
             <a href="/sparepart-pelanggan" class="service-card">
                 <div class="service-icon">🔩</div>
                 <h3>Belanja Spare Part</h3>
@@ -762,7 +790,6 @@
                 <span class="service-link">Lihat katalog →</span>
             </a>
 
-            <!-- KARTU LAMA: RIWAYAT PESANAN -->
             <a href="/order-pelanggan" class="service-card">
                 <div class="service-icon">🛒</div>
                 <h3>Pesanan Spare Part</h3>

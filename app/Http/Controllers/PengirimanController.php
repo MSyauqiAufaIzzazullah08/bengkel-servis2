@@ -7,6 +7,7 @@ use App\Models\OrderSparePart;
 use App\Models\Ekspedisi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class PengirimanController extends Controller
 {
@@ -22,7 +23,12 @@ class PengirimanController extends Controller
 
     public function create()
     {
-        $orders = OrderSparePart::with('pelanggan')->get();
+        // Hanya pesanan Diproses yang belum memiliki pengiriman.
+        $orders = OrderSparePart::with('pelanggan')
+            ->where('status', 'Diproses')
+            ->whereDoesntHave('pengiriman')
+            ->get();
+
         $ekspedisi = Ekspedisi::all();
 
         return view('pengiriman.create', compact(
@@ -38,15 +44,55 @@ class PengirimanController extends Controller
             'id_ekspedisi' => 'required|exists:ekspedisi,id_ekspedisi',
             'kurir' => 'required|string|max:255',
             'no_resi' => 'required|string|max:255',
-            'status' => 'required|in:Pending,Dikirim,Tiba',
+            'status' => 'required|in:pending,dikirim',
             'estimasi_tiba' => 'nullable|date',
             'tanggal_kirim' => 'nullable|date',
         ]);
 
         DB::transaction(function () use ($validated) {
-            $pengiriman = Pengiriman::create($validated);
+            $order = OrderSparePart::where(
+                'id_order',
+                $validated['id_order']
+            )->lockForUpdate()->firstOrFail();
 
-            $this->sinkronkanStatusPesanan($pengiriman);
+            if ($order->status !== 'Diproses') {
+                throw ValidationException::withMessages([
+                    'id_order' => 'Hanya pesanan berstatus Diproses yang dapat dikirim.',
+                ]);
+            }
+
+            if ($order->pengiriman()->exists()) {
+                throw ValidationException::withMessages([
+                    'id_order' => 'Pesanan ini sudah memiliki data pengiriman.',
+                ]);
+            }
+
+            $statusPengiriman = strtolower($validated['status']);
+
+            // Pembayaran harus lunas sebelum barang dikirim.
+            if ($statusPengiriman === 'dikirim') {
+                $lunas = DB::table('Pembayaran')
+                    ->where('id_order', $order->id_order)
+                    ->whereRaw('LOWER(status) = ?', ['lunas'])
+                    ->exists();
+
+                if (!$lunas) {
+                    throw ValidationException::withMessages([
+                        'status' => 'Pesanan harus lunas sebelum dikirim.',
+                    ]);
+                }
+
+                if (empty($validated['tanggal_kirim'])) {
+                    $validated['tanggal_kirim'] = now()->toDateString();
+                }
+            }
+
+            Pengiriman::create($validated);
+
+            if ($statusPengiriman === 'dikirim') {
+                $order->status = 'Dikirim';
+                $order->save();
+            }
         });
 
         return redirect('/pengiriman')
@@ -56,7 +102,6 @@ class PengirimanController extends Controller
     public function edit($id)
     {
         $pengiriman = Pengiriman::findOrFail($id);
-
         $orders = OrderSparePart::with('pelanggan')->get();
         $ekspedisi = Ekspedisi::all();
 
@@ -67,40 +112,131 @@ class PengirimanController extends Controller
         ));
     }
 
-    
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'id_order' => 'required|exists:ordersparepart,id_order',
+            'id_ekspedisi' => 'required|exists:ekspedisi,id_ekspedisi',
+            'kurir' => 'required|string|max:255',
+            'no_resi' => 'required|string|max:255',
+            'status' => 'required|in:pending,dikirim,tiba',
+            'estimasi_tiba' => 'nullable|date',
+            'tanggal_kirim' => 'nullable|date',
+        ]);
 
-public function update(Request $request, $id)
-{
-    $validated = $request->validate([
-        'id_order' => 'required|exists:ordersparepart,id_order',
-        'id_ekspedisi' => 'required|exists:ekspedisi,id_ekspedisi',
-        'kurir' => 'required|string|max:255',
-        'no_resi' => 'required|string|max:255',
-        'status' => 'required|in:Pending,Dikirim,Tiba,pending,dikirim,tiba',
-        'estimasi_tiba' => 'nullable|date',
-        'tanggal_kirim' => 'nullable|date',
-    ]);
+        DB::transaction(function () use ($validated, $id) {
+            $pengiriman = Pengiriman::where(
+                'id_pengiriman',
+                $id
+            )->lockForUpdate()->firstOrFail();
 
-    DB::transaction(function () use ($validated, $id) {
-        $pengiriman = Pengiriman::findOrFail($id);
+            // Satu pengiriman tidak boleh dipindahkan ke pesanan lain.
+            if ((int) $validated['id_order'] !== (int) $pengiriman->id_order) {
+                throw ValidationException::withMessages([
+                    'id_order' => 'Pengiriman tidak boleh dipindahkan ke pesanan lain.',
+                ]);
+            }
 
-        $statusPengiriman = strtolower(trim($validated['status']));
+            $order = OrderSparePart::where(
+                'id_order',
+                $pengiriman->id_order
+            )->lockForUpdate()->firstOrFail();
 
-        $statusPesanan = match ($statusPengiriman) {
-            'pending' => 'Diproses',
-            'dikirim' => 'Dikirim',
-            'tiba' => 'Selesai',
-        };
+            $statusLama = strtolower($pengiriman->status);
+            $statusBaru = strtolower($validated['status']);
 
-        $pengiriman->update($validated);
+            if ($statusLama === $statusBaru) {
+                $pengiriman->update($validated);
+                return;
+            }
 
-        DB::table('ordersparepart')
-            ->where('id_order', $validated['id_order'])
-            ->update(['status' => $statusPesanan]);
-    });
+            // Pengiriman hanya boleh maju: pending -> dikirim -> tiba.
+            $alur = [
+                'pending' => ['dikirim'],
+                'dikirim' => ['tiba'],
+                'tiba' => [],
+            ];
 
-    return redirect('/pengiriman')
-        ->with('success', 'Status pengiriman dan pesanan berhasil diperbarui.');
-}
+            if (!in_array($statusBaru, $alur[$statusLama] ?? [], true)) {
+                throw ValidationException::withMessages([
+                    'status' => 'Perubahan status pengiriman tidak diizinkan.',
+                ]);
+            }
 
+            if ($statusBaru === 'dikirim') {
+                if ($order->status !== 'Diproses') {
+                    throw ValidationException::withMessages([
+                        'status' => 'Pesanan harus berstatus Diproses sebelum dikirim.',
+                    ]);
+                }
+
+                $lunas = DB::table('Pembayaran')
+                    ->where('id_order', $order->id_order)
+                    ->whereRaw('LOWER(status) = ?', ['lunas'])
+                    ->exists();
+
+                if (!$lunas) {
+                    throw ValidationException::withMessages([
+                        'status' => 'Pesanan harus lunas sebelum dikirim.',
+                    ]);
+                }
+
+                if (empty($validated['tanggal_kirim'])) {
+                    $validated['tanggal_kirim'] = now()->toDateString();
+                }
+
+                $order->status = 'Dikirim';
+                $order->save();
+            }
+
+            if ($statusBaru === 'tiba') {
+                if ($order->status !== 'Dikirim') {
+                    throw ValidationException::withMessages([
+                        'status' => 'Pesanan harus berstatus Dikirim sebelum dinyatakan selesai.',
+                    ]);
+                }
+
+                $order->status = 'Selesai';
+                $order->save();
+            }
+
+            $pengiriman->update($validated);
+        });
+
+        return redirect('/pengiriman')
+            ->with('success', 'Status pengiriman dan pesanan berhasil diperbarui.');
+    }
+
+    public function destroy($id)
+    {
+        DB::transaction(function () use ($id) {
+            $pengiriman = Pengiriman::where(
+                'id_pengiriman',
+                $id
+            )->lockForUpdate()->firstOrFail();
+
+            // Data pengiriman aktif atau selesai tidak boleh dihapus.
+            if (strtolower($pengiriman->status) !== 'pending') {
+                throw ValidationException::withMessages([
+                    'status' => 'Hanya data pengiriman berstatus Pending yang dapat dihapus.',
+                ]);
+            }
+
+            $order = OrderSparePart::where(
+                'id_order',
+                $pengiriman->id_order
+            )->lockForUpdate()->firstOrFail();
+
+            if ($order->status !== 'Diproses') {
+                throw ValidationException::withMessages([
+                    'status' => 'Pengiriman tidak dapat dihapus karena status pesanan sudah berubah.',
+                ]);
+            }
+
+            $pengiriman->delete();
+        });
+
+        return redirect('/pengiriman')
+            ->with('success', 'Data pengiriman berhasil dihapus.');
+    }
 }

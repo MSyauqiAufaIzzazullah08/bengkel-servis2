@@ -96,6 +96,7 @@
 <h3 class="admin-section-title">Menu Pengelolaan Cabang</h3>
 
 <div class="admin-menu-grid">
+
     <a href="/pengelolaan-booking" class="admin-menu-card">
         <div class="admin-menu-icon"><i class="fas fa-calendar-check"></i></div>
         <h3>Booking Servis</h3>
@@ -162,10 +163,24 @@
         <p>Kelola layanan servis panggilan.</p>
     </a>
 
+    {{-- MENU BARU: PEMBAYARAN HOME SERVICE --}}
+    <a href="{{ route('pembayaran-home-service.index') }}"
+       class="admin-menu-card">
+        <div class="admin-menu-icon">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <h3>Pembayaran Home Service</h3>
+        <p>
+            Lihat dan kelola pembayaran layanan Home Service
+            pelanggan setelah servis selesai.
+        </p>
+    </a>
+
     <a href="/pengiriman" class="admin-menu-card">
         <div class="admin-menu-icon"><i class="fas fa-truck"></i></div>
         <h3>Pengiriman</h3>
         <p>Pantau pengiriman pesanan suku cadang.</p>
     </a>
+
 </div>
 @endsection

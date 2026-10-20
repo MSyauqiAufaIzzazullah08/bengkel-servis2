@@ -46,14 +46,14 @@ class AdminPesananSparePartController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
+        $validated = $request->validate([
             'status' => [
                 'required',
                 'in:Pending,Diproses,Dikirim,Selesai,Dibatalkan',
             ],
         ]);
 
-        $statusBaru = $request->status;
+        $statusBaru = $validated['status'];
 
         DB::transaction(function () use ($id, $statusBaru) {
             $order = OrderSparePart::with('orderDetail')
@@ -63,16 +63,17 @@ class AdminPesananSparePartController extends Controller
 
             $statusLama = $order->status;
 
-            // Status yang sama tidak boleh mengurangi stok lagi.
+            // Status yang sama tidak memproses stok kembali.
             if ($statusLama === $statusBaru) {
                 return;
             }
 
-            // Aturan perpindahan status pesanan.
+            // Petugas Spare Part tidak boleh mengatur
+            // status Dikirim atau Selesai secara langsung.
             $alurStatus = [
                 'Pending' => ['Diproses', 'Dibatalkan'],
-                'Diproses' => ['Dikirim', 'Dibatalkan'],
-                'Dikirim' => ['Selesai'],
+                'Diproses' => ['Dibatalkan'],
+                'Dikirim' => [],
                 'Selesai' => [],
                 'Dibatalkan' => [],
             ];
@@ -83,22 +84,26 @@ class AdminPesananSparePartController extends Controller
                 true
             )) {
                 throw ValidationException::withMessages([
-                    'status' => 'Perubahan status pesanan tidak diizinkan.',
+                    'status' =>
+                        'Perubahan status tidak diizinkan. '
+                        . 'Status Dikirim dan Selesai harus '
+                        . 'diperbarui melalui proses pengiriman.',
                 ]);
             }
 
-            // Saat mulai diproses, validasi dan kurangi stok.
+            // Pending -> Diproses:
+            // periksa seluruh barang sebelum mengurangi stok.
             if (
                 $statusLama === 'Pending'
                 && $statusBaru === 'Diproses'
             ) {
                 if ($order->orderDetail->isEmpty()) {
                     throw ValidationException::withMessages([
-                        'status' => 'Pesanan belum memiliki rincian barang.',
+                        'status' =>
+                            'Pesanan belum memiliki rincian barang.',
                     ]);
                 }
 
-                // Kunci semua barang dan periksa stok terlebih dahulu.
                 $barangPesanan = [];
 
                 foreach ($order->orderDetail as $detail) {
@@ -111,7 +116,8 @@ class AdminPesananSparePartController extends Controller
 
                     if (!$sparepart) {
                         throw ValidationException::withMessages([
-                            'status' => 'Spare part pada pesanan tidak ditemukan.',
+                            'status' =>
+                                'Spare part pada pesanan tidak ditemukan.',
                         ]);
                     }
 
@@ -119,7 +125,8 @@ class AdminPesananSparePartController extends Controller
 
                     if ($jumlah < 1 || $sparepart->stok < $jumlah) {
                         throw ValidationException::withMessages([
-                            'status' => 'Stok ' . $sparepart->nama
+                            'status' =>
+                                'Stok ' . $sparepart->nama
                                 . ' tidak mencukupi. Stok tersedia: '
                                 . $sparepart->stok,
                         ]);
@@ -131,7 +138,7 @@ class AdminPesananSparePartController extends Controller
                     ];
                 }
 
-                // Semua stok cukup, baru kurangi stok tiap barang.
+                // Kurangi stok hanya setelah semua barang lolos.
                 foreach ($barangPesanan as $barang) {
                     $barang['sparepart']->decrement(
                         'stok',
@@ -140,12 +147,22 @@ class AdminPesananSparePartController extends Controller
                 }
             }
 
-            // Jika pesanan yang sedang diproses dibatalkan,
-            // kembalikan stok yang sebelumnya telah dikurangi.
+            // Diproses -> Dibatalkan:
+            // jika sudah ada data pengiriman, selesaikan
+            // atau hapus pengiriman Pending terlebih dahulu.
             if (
                 $statusLama === 'Diproses'
                 && $statusBaru === 'Dibatalkan'
             ) {
+                if ($order->pengiriman()->exists()) {
+                    throw ValidationException::withMessages([
+                        'status' =>
+                            'Pesanan sudah memiliki data pengiriman. '
+                            . 'Hapus data pengiriman yang masih Pending '
+                            . 'terlebih dahulu sebelum membatalkan pesanan.',
+                    ]);
+                }
+
                 foreach ($order->orderDetail as $detail) {
                     $sparepart = SparePart::where(
                         'id_sparepart',
@@ -156,7 +173,8 @@ class AdminPesananSparePartController extends Controller
 
                     if (!$sparepart) {
                         throw ValidationException::withMessages([
-                            'status' => 'Spare part tidak ditemukan. '
+                            'status' =>
+                                'Spare part tidak ditemukan. '
                                 . 'Pembatalan tidak dapat diproses.',
                         ]);
                     }
@@ -173,6 +191,9 @@ class AdminPesananSparePartController extends Controller
         });
 
         return redirect('/admin-pesanan-sparepart')
-            ->with('success', 'Status pesanan berhasil diperbarui.');
+            ->with(
+                'success',
+                'Status pesanan berhasil diperbarui.'
+            );
     }
 }

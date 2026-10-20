@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kendaraan extends Model
 {
-    protected $table = 'Kendaraan';
+    protected $table = 'kendaraan';
     protected $primaryKey = 'id_kendaraan';
 
     public $timestamps = false;
@@ -17,6 +17,7 @@ class Kendaraan extends Model
         'model',
         'tahun',
         'nopol',
+        'foto',
     ];
 
     public function pelanggan()
@@ -32,15 +33,6 @@ class Kendaraan extends Model
     {
         return $this->hasMany(
             BookingServis::class,
-            'id_kendaraan',
-            'id_kendaraan'
-        );
-    }
-
-    public function homeServis()
-    {
-        return $this->hasMany(
-            HomeServis::class,
             'id_kendaraan',
             'id_kendaraan'
         );

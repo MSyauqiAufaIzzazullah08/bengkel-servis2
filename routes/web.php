@@ -524,7 +524,7 @@ Route::middleware('role:1,2,9')->group(function () {
 });
 
 // PENGIRIMAN
-Route::middleware('role:1,2,10')->group(function () {
+Route::middleware('role:1,2,9')->group(function () {
     Route::resource(
         '/pengiriman',
         PengirimanController::class
@@ -532,7 +532,7 @@ Route::middleware('role:1,2,10')->group(function () {
 });
 
 // EKSPEDISI
-Route::middleware('role:1,2,10')->group(function () {
+Route::middleware('role:1,2,9')->group(function () {
     Route::resource(
         '/ekspedisi',
         EkspedisiController::class
@@ -579,7 +579,15 @@ Route::middleware('role:3')->group(function () {
 });
 
 
-    // PEMBAYARAN HOME SERVICE
+    
+/*
+|--------------------------------------------------------------------------
+| PEMBAYARAN HOME SERVICE
+|--------------------------------------------------------------------------
+| Akses untuk Super Admin, Admin Cabang, dan Petugas Service.
+*/
+
+Route::middleware('role:1,2,3')->group(function () {
     Route::get(
         '/pembayaran-home-service',
         [PembayaranHomeServisController::class, 'index']
@@ -594,7 +602,7 @@ Route::middleware('role:3')->group(function () {
         '/pembayaran-home-service',
         [PembayaranHomeServisController::class, 'store']
     )->name('pembayaran-home-service.store');
-
+});
 
 // DASHBOARD KHUSUS ADMIN CABANG
 Route::middleware('role:2')->group(function () {
@@ -653,4 +661,42 @@ Route::middleware('role:10')->group(function () {
     Route::get('/dashboard-petugas-pengiriman', function () {
         return view('dashboard-petugas-pengiriman');
     })->name('dashboard.petugas-pengiriman');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| Laporan Pembayaran
+|--------------------------------------------------------------------------
+| Akses hanya untuk Super Admin dan Petugas Service.
+*/
+Route::middleware('role:1,3')->group(function () {
+    Route::get('/laporan-pembayaran', [
+        \App\Http\Controllers\LaporanPembayaranController::class,
+        'index'
+    ])->name('laporan-pembayaran.index');
+
+    Route::get('/laporan-pembayaran/pdf', [
+        \App\Http\Controllers\LaporanPembayaranController::class,
+        'download'
+    ])->name('laporan-pembayaran.download');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| PENGAJUAN HOME SERVICE PELANGGAN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:6')->group(function () {
+    Route::get(
+        '/home-service-pelanggan',
+        [\App\Http\Controllers\PengajuanHomeServisController::class, 'create']
+    )->name('pelanggan.home-service.create');
+
+    Route::post(
+        '/home-service-pelanggan',
+        [\App\Http\Controllers\PengajuanHomeServisController::class, 'store']
+    )->name('pelanggan.home-service.store');
 });

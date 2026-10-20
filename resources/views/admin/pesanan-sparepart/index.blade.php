@@ -290,23 +290,26 @@
                                         method="POST">
 
                                         @csrf
-                                        @method('PUT')
+                                        @method('PUT')                       
+@php
+    $statusOptions = match ($order->status) {
+        'Pending' => ['Pending', 'Diproses', 'Dibatalkan'],
+        'Diproses' => ['Diproses', 'Dibatalkan'],
+        default => [$order->status],
+    };
+@endphp
 
-                                        <select name="status" required>
-                                            @foreach ([
-                                                'Pending',
-                                                'Diproses',
-                                                'Dikirim',
-                                                'Selesai',
-                                                'Dibatalkan'
-                                            ] as $status)
-                                                <option
-                                                    value="{{ $status }}"
-                                                    {{ $order->status === $status ? 'selected' : '' }}>
-                                                    {{ $status }}
-                                                </option>
-                                            @endforeach
-                                        </select>
+<select name="status" required>
+    @foreach ($statusOptions as $status)
+        <option
+            value="{{ $status }}"
+            {{ $order->status === $status ? 'selected' : '' }}
+        >
+            {{ $status }}
+        </option>
+    @endforeach
+</select>
+
 
                                         <button type="submit">Simpan Status</button>
                                     </form>

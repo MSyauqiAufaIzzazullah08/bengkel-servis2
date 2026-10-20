@@ -15,7 +15,7 @@ class PelangganBookingController extends Controller
     }
 
     /**
-     * Menampilkan booking milik pelanggan yang sedang login.
+     * Riwayat booking bengkel dan Home Service pelanggan.
      */
     public function index()
     {
@@ -25,6 +25,7 @@ class PelangganBookingController extends Controller
             abort(403, 'Data pelanggan tidak ditemukan.');
         }
 
+        // Booking servis langsung ke bengkel.
         $bookings = DB::table('bookingservis as b')
             ->leftJoin(
                 'kendaraan as k',
@@ -58,9 +59,65 @@ class PelangganBookingController extends Controller
                 'l.nama_layanan',
                 'l.harga'
             )
-            ->orderByDesc('b.tanggal_booking')
-            ->orderByDesc('b.waktu_booking')
-            ->get();
+            ->get()
+            ->map(function ($booking) {
+                $booking->jenis_pengajuan = 'Servis Bengkel';
+                $booking->alamat_home_service = null;
+
+                return $booking;
+            });
+
+        // Pengajuan Home Service pelanggan.
+        $homeServices = DB::table('homeservice as hs')
+            ->leftJoin(
+                'kendaraan as k',
+                'hs.id_kendaraan',
+                '=',
+                'k.id_kendaraan'
+            )
+            ->leftJoin(
+                'cabang as c',
+                'hs.id_cabang',
+                '=',
+                'c.id_cabang'
+            )
+            ->leftJoin(
+                'layananservis as l',
+                'hs.id_layanan_servis',
+                '=',
+                'l.id_layanan'
+            )
+            ->where('hs.id_pelanggan', $pelanggan->id_pelanggan)
+            ->select(
+                'hs.id_home_service as id_booking',
+                'hs.tanggal as tanggal_booking',
+                'hs.status',
+                'hs.catatan',
+                'hs.alamat as alamat_home_service',
+                'k.merk',
+                'k.model',
+                'k.nopol',
+                'c.nama_cabang',
+                'l.nama_layanan',
+                'l.harga'
+            )
+            ->get()
+            ->map(function ($homeService) {
+                $homeService->waktu_booking = null;
+                $homeService->jenis_pengajuan = 'Home Service';
+
+                return $homeService;
+            });
+
+        // Gabungkan kedua jenis pengajuan dan urutkan berdasarkan tanggal.
+        $bookings = $bookings
+            ->concat($homeServices)
+            ->sortByDesc(function ($item) {
+                return $item->tanggal_booking
+                    . ' '
+                    . ($item->waktu_booking ?? '00:00:00');
+            })
+            ->values();
 
         return view('pelanggan.booking.index', compact(
             'pelanggan',
@@ -120,7 +177,6 @@ class PelangganBookingController extends Controller
             'catatan' => 'nullable|string|max:2000',
         ]);
 
-        // Pastikan kendaraan milik pelanggan yang login.
         $kendaraanValid = DB::table('kendaraan')
             ->where('id_kendaraan', $data['id_kendaraan'])
             ->where('id_pelanggan', $pelanggan->id_pelanggan)
@@ -135,7 +191,6 @@ class PelangganBookingController extends Controller
                 ]);
         }
 
-        // Pastikan cabang tersedia.
         $cabangValid = DB::table('cabang')
             ->where('id_cabang', $data['id_cabang'])
             ->exists();
@@ -148,7 +203,6 @@ class PelangganBookingController extends Controller
                 ]);
         }
 
-        // Pastikan layanan tersedia.
         $layananValid = DB::table('layananservis')
             ->where('id_layanan', $data['layanan_id'])
             ->exists();
