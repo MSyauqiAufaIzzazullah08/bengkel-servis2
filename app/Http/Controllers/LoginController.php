@@ -45,6 +45,7 @@ class LoginController extends Controller
             'user_nama' => $user->nama,
             'user_email' => $user->email,
             'role_id' => (int) $user->role_id,
+            'cabang_id' => $user->cabang_id ? (int) $user->cabang_id : null,
         ]);
 
         $request->session()->regenerate();

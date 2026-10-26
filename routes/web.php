@@ -36,6 +36,17 @@ use App\Http\Controllers\PelangganSparePartController;
 use App\Http\Controllers\AdminPesananSparePartController;
 use App\Http\Controllers\DashboardMontirLapanganController;
 use App\Http\Controllers\PembayaranHomeServisController;
+use App\Http\Controllers\LaporanCabangController;
+use App\Http\Controllers\LaporanSuperAdminController;
+use App\Http\Controllers\BookingOfflineController;
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-003: KOMISI TEKNISI
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\KomisiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -611,6 +622,75 @@ Route::middleware('role:2')->group(function () {
     });
 });
 
+/*
+|--------------------------------------------------------------------------
+| FEAT-001: BOOKING OFFLINE — Admin Cabang (role:2)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:2')->group(function () {
+    Route::get(
+        '/booking-offline',
+        [BookingOfflineController::class, 'index']
+    )->name('booking-offline.index');
+
+    Route::get(
+        '/booking-offline/create',
+        [BookingOfflineController::class, 'create']
+    )->name('booking-offline.create');
+
+    Route::post(
+        '/booking-offline',
+        [BookingOfflineController::class, 'store']
+    )->name('booking-offline.store');
+
+    Route::get(
+        '/booking-offline/cari-pelanggan',
+        [BookingOfflineController::class, 'cariPelanggan']
+    )->name('booking-offline.cari-pelanggan');
+
+    Route::get(
+        '/booking-offline/cari-kendaraan',
+        [BookingOfflineController::class, 'cariKendaraan']
+    )->name('booking-offline.cari-kendaraan');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-004: LAPORAN CABANG — Admin Cabang (role:2)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:2')->group(function () {
+    Route::get(
+        '/laporan-cabang',
+        [LaporanCabangController::class, 'index']
+    )->name('laporan.cabang');
+
+    Route::get(
+        '/laporan-cabang/pdf',
+        [LaporanCabangController::class, 'exportPdf']
+    )->name('laporan.cabang.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-004: LAPORAN EKSEKUTIF — Super Admin (role:1)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:1')->group(function () {
+    Route::get(
+        '/laporan-superadmin',
+        [LaporanSuperAdminController::class, 'index']
+    )->name('laporan.superadmin');
+
+    Route::get(
+        '/laporan-superadmin/pdf',
+        [LaporanSuperAdminController::class, 'exportPdf']
+    )->name('laporan.superadmin.pdf');
+});
+
 
  // DASHBOARD KHUSUS TEKNISI
 Route::middleware('role:4')->group(function () {
@@ -625,10 +705,12 @@ Route::middleware('role:4')->group(function () {
     )->name('teknisi.penugasan.status');
 });
 
-Route::get(
-    '/teknisi/rating',
-    [\App\Http\Controllers\TeknisiRatingController::class, 'index']
-)->name('teknisi.rating.index');
+Route::middleware('role:4')->group(function () {
+    Route::get(
+        '/teknisi/rating',
+        [\App\Http\Controllers\TeknisiRatingController::class, 'index']
+    )->name('teknisi.rating.index');
+});
 
 // DASHBOARD DAN TUGAS MONTIR LAPANGAN
 
@@ -699,4 +781,172 @@ Route::middleware('role:6')->group(function () {
         '/home-service-pelanggan',
         [\App\Http\Controllers\PengajuanHomeServisController::class, 'store']
     )->name('pelanggan.home-service.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-002: LAPORAN SERVIS TEKNISI (role:4)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:4')->group(function () {
+    Route::get(
+        '/laporan-servis-teknisi',
+        [\App\Http\Controllers\LaporanServisTeknisiController::class, 'index']
+    )->name('laporan-servis-teknisi.index');
+
+    Route::get(
+        '/laporan-servis-teknisi/create/{id_penugasan}',
+        [\App\Http\Controllers\LaporanServisTeknisiController::class, 'create']
+    )->name('laporan-servis-teknisi.create');
+
+    Route::post(
+        '/laporan-servis-teknisi',
+        [\App\Http\Controllers\LaporanServisTeknisiController::class, 'store']
+    )->name('laporan-servis-teknisi.store');
+
+    Route::get(
+        '/laporan-servis-teknisi/{id}/edit',
+        [\App\Http\Controllers\LaporanServisTeknisiController::class, 'edit']
+    )->name('laporan-servis-teknisi.edit');
+
+    Route::put(
+        '/laporan-servis-teknisi/{id}',
+        [\App\Http\Controllers\LaporanServisTeknisiController::class, 'update']
+    )->name('laporan-servis-teknisi.update');
+
+    Route::put(
+        '/laporan-servis-teknisi/{id}/submit',
+        [\App\Http\Controllers\LaporanServisTeknisiController::class, 'submit']
+    )->name('laporan-servis-teknisi.submit');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-002: VERIFIKASI LAPORAN (role:2 — Admin Cabang)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:2')->group(function () {
+    Route::get(
+        '/verifikasi-laporan',
+        [\App\Http\Controllers\VerifikasiLaporanController::class, 'index']
+    )->name('verifikasi-laporan.index');
+
+    Route::get(
+        '/verifikasi-laporan/{id}',
+        [\App\Http\Controllers\VerifikasiLaporanController::class, 'show']
+    )->name('verifikasi-laporan.show');
+
+    Route::put(
+        '/verifikasi-laporan/{id}/approve',
+        [\App\Http\Controllers\VerifikasiLaporanController::class, 'setujui']
+    )->name('verifikasi-laporan.setujui');
+
+    Route::put(
+        '/verifikasi-laporan/{id}/revisi',
+        [\App\Http\Controllers\VerifikasiLaporanController::class, 'minta_revisi']
+    )->name('verifikasi-laporan.minta-revisi');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-002: LAPORAN SERVIS PELANGGAN (role:6)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:6')->group(function () {
+    Route::get(
+        '/laporan-servis-pelanggan',
+        [\App\Http\Controllers\LaporanServisPelangganController::class, 'index']
+    )->name('laporan-servis-pelanggan.index');
+
+    Route::get(
+        '/laporan-servis-pelanggan/{id}',
+        [\App\Http\Controllers\LaporanServisPelangganController::class, 'show']
+    )->name('laporan-servis-pelanggan.show');
+
+    Route::get(
+        '/laporan-servis-pelanggan/{id}/pdf',
+        [\App\Http\Controllers\LaporanServisPelangganController::class, 'downloadPdf']
+    )->name('laporan-servis-pelanggan.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-002: LAPORAN SERVIS ADMIN CABANG — cetak offline (role:2)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:2')->group(function () {
+    Route::get(
+        '/admin/laporan-servis',
+        [\App\Http\Controllers\LaporanServisPelangganController::class, 'indexAdmin']
+    )->name('admin.laporan-servis.index');
+
+    Route::get(
+        '/admin/laporan-servis/{id}/pdf',
+        [\App\Http\Controllers\LaporanServisPelangganController::class, 'downloadPdfAdmin']
+    )->name('admin.laporan-servis.pdf');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-005: PENGHARGAAN TEKNISI — Super Admin & Admin Cabang (role:1,2)
+|--------------------------------------------------------------------------
+*/
+
+use App\Http\Controllers\PenghargaanController;
+
+Route::middleware('role:1,2')->group(function () {
+    Route::get(
+        '/penghargaan',
+        [PenghargaanController::class, 'index']
+    )->name('penghargaan.index');
+
+    Route::post(
+        '/penghargaan/generate',
+        [PenghargaanController::class, 'generate']
+    )->name('penghargaan.generate');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-003: KONFIGURASI KOMISI — Super Admin (role:1)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:1')->group(function () {
+    Route::get(
+        '/komisi/konfigurasi',
+        [KomisiController::class, 'indexKonfigurasi']
+    )->name('komisi.konfigurasi.index');
+
+    Route::get(
+        '/komisi/konfigurasi/create',
+        [KomisiController::class, 'createKonfigurasi']
+    )->name('komisi.konfigurasi.create');
+
+    Route::post(
+        '/komisi/konfigurasi',
+        [KomisiController::class, 'storeKonfigurasi']
+    )->name('komisi.konfigurasi.store');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT-003: DATA KOMISI — Super Admin & Admin Cabang (role:1,2)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('role:1,2')->group(function () {
+    Route::get(
+        '/komisi',
+        [KomisiController::class, 'indexKomisi']
+    )->name('komisi.index');
+
+    Route::put(
+        '/komisi/{id}/bayar',
+        [KomisiController::class, 'markDibayar']
+    )->name('komisi.bayar');
 });

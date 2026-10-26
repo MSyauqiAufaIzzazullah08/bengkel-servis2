@@ -10,12 +10,12 @@ use Illuminate\Support\Facades\DB;
 class LaporanServisPelangganController extends Controller
 {
     /**
-     * Resolve pelanggan dari email session.
+     * Resolve pelanggan dari user_id session (untuk pelanggan online).
      */
     private function resolvePelanggan()
     {
         $pelanggan = DB::table('pelanggan')
-            ->where('email', session('user_email'))
+            ->where('user_id', session('user_id'))
             ->first();
 
         abort_if(!$pelanggan, 403, 'Data pelanggan tidak ditemukan.');

@@ -185,6 +185,15 @@
                 <div class="nav-section-title">Menu Utama</div>
 
 <div class="nav-item">
+    <a href="{{ route('booking-offline.index') }}"
+       class="nav-link {{ request()->is('booking-offline*') ? 'active' : '' }}"
+       data-tooltip="Booking Offline">
+        <span class="nav-icon"><i class="fas fa-calendar-plus"></i></span>
+        <span class="nav-text">Booking Offline</span>
+    </a>
+</div>
+
+<div class="nav-item">
     <a href="/pengelolaan-booking"
        class="nav-link {{ request()->is('pengelolaan-booking*') ? 'active' : '' }}"
        data-tooltip="Booking Servis">
@@ -262,6 +271,24 @@
        data-tooltip="Komisi Teknisi">
         <span class="nav-icon"><i class="fas fa-money-bill-wave"></i></span>
         <span class="nav-text">Komisi Teknisi</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="{{ route('laporan.cabang') }}"
+       class="nav-link {{ request()->is('laporan-cabang*') ? 'active' : '' }}"
+       data-tooltip="Laporan Cabang">
+        <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
+        <span class="nav-text">Laporan Cabang</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="{{ route('penghargaan.index') }}"
+       class="nav-link {{ request()->is('penghargaan*') ? 'active' : '' }}"
+       data-tooltip="Penghargaan Teknisi">
+        <span class="nav-icon"><i class="fas fa-trophy"></i></span>
+        <span class="nav-text">Penghargaan Teknisi</span>
     </a>
 </div>
 
@@ -678,6 +705,24 @@
                    data-tooltip="Data Komisi">
                     <span class="nav-icon"><i class="fas fa-money-bill-wave"></i></span>
                     <span class="nav-text">Data Komisi</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="{{ route('laporan.superadmin') }}"
+                   class="nav-link {{ request()->is('laporan-superadmin*') ? 'active' : '' }}"
+                   data-tooltip="Laporan Eksekutif">
+                    <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                    <span class="nav-text">Laporan Eksekutif</span>
+                </a>
+            </div>
+
+            <div class="nav-item">
+                <a href="{{ route('penghargaan.index') }}"
+                   class="nav-link {{ request()->is('penghargaan*') ? 'active' : '' }}"
+                   data-tooltip="Penghargaan Teknisi">
+                    <span class="nav-icon"><i class="fas fa-trophy"></i></span>
+                    <span class="nav-text">Penghargaan Teknisi</span>
                 </a>
             </div>
 
