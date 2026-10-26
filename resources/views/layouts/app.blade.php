@@ -57,8 +57,8 @@
 
     
 <div class="nav-item">
-    <a href="{{ route('montir-lapangan.tugas.index') }}"#tugas-home-service"
-       class="nav-link"
+    <a href="{{ route('montir-lapangan.tugas.index') }}"
+       class="nav-link {{ request()->is('montir-lapangan/tugas*') ? 'active' : '' }}"
        data-tooltip="Tugas Home Service">
         <span class="nav-icon">
             <i class="fas fa-tools"></i>
@@ -140,8 +140,6 @@
                     </a>
                 </div>
             
-                <div class="nav-item">
-    
                 <div class="nav-item">
                     <a href="/pembayaran"
                        class="nav-link {{ request()->is('pembayaran*') && !request()->is('pembayaran-home-service*') ? 'active' : '' }}"
@@ -240,6 +238,33 @@
     </a>
 </div>
 
+<div class="nav-item">
+    <a href="{{ route('verifikasi-laporan.index') }}"
+       class="nav-link {{ request()->is('verifikasi-laporan*') ? 'active' : '' }}"
+       data-tooltip="Verifikasi Laporan">
+        <span class="nav-icon"><i class="fas fa-clipboard-check"></i></span>
+        <span class="nav-text">Verifikasi Laporan</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="{{ route('admin.laporan-servis.index') }}"
+       class="nav-link {{ request()->is('admin/laporan-servis*') ? 'active' : '' }}"
+       data-tooltip="Laporan Servis">
+        <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+        <span class="nav-text">Laporan Servis</span>
+    </a>
+</div>
+
+<div class="nav-item">
+    <a href="{{ route('komisi.index') }}"
+       class="nav-link {{ request()->is('komisi') ? 'active' : '' }}"
+       data-tooltip="Komisi Teknisi">
+        <span class="nav-icon"><i class="fas fa-money-bill-wave"></i></span>
+        <span class="nav-text">Komisi Teknisi</span>
+    </a>
+</div>
+
 
             @elseif ((int) session('role_id') === 4)
                 {{-- SIDEBAR KHUSUS TEKNISI --}}
@@ -270,6 +295,15 @@
                        data-tooltip="Rating & Ulasan">
                         <span class="nav-icon"><i class="fas fa-star"></i></span>
                         <span class="nav-text">Rating & Ulasan</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="{{ route('laporan-servis-teknisi.index') }}"
+                       class="nav-link {{ request()->is('laporan-servis-teknisi*') ? 'active' : '' }}"
+                       data-tooltip="Laporan Servis Saya">
+                        <span class="nav-icon"><i class="fas fa-file-medical-alt"></i></span>
+                        <span class="nav-text">Laporan Servis Saya</span>
                     </a>
                 </div>
 
@@ -348,6 +382,58 @@
                        data-tooltip="Ekspedisi">
                         <span class="nav-icon"><i class="fas fa-shipping-fast"></i></span>
                         <span class="nav-text">Ekspedisi</span>
+                    </a>
+                </div>
+
+
+            @elseif ((int) session('role_id') === 6)
+                {{-- SIDEBAR KHUSUS PELANGGAN --}}
+                <div class="nav-item">
+                    <a href="/dashboard-pelanggan"
+                       class="nav-link {{ request()->is('dashboard-pelanggan') ? 'active' : '' }}"
+                       data-tooltip="Dashboard">
+                        <span class="nav-icon"><i class="fas fa-home"></i></span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Servis Kendaraan</div>
+
+                <div class="nav-item">
+                    <a href="/booking-pelanggan"
+                       class="nav-link {{ request()->is('booking-pelanggan*') ? 'active' : '' }}"
+                       data-tooltip="Booking Servis">
+                        <span class="nav-icon"><i class="fas fa-calendar-check"></i></span>
+                        <span class="nav-text">Booking Servis</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="{{ route('laporan-servis-pelanggan.index') }}"
+                       class="nav-link {{ request()->is('laporan-servis-pelanggan*') ? 'active' : '' }}"
+                       data-tooltip="Laporan Servis">
+                        <span class="nav-icon"><i class="fas fa-file-alt"></i></span>
+                        <span class="nav-text">Laporan Servis</span>
+                    </a>
+                </div>
+
+                <div class="nav-section-title">Kendaraan & Lainnya</div>
+
+                <div class="nav-item">
+                    <a href="/kendaraan-pelanggan"
+                       class="nav-link {{ request()->is('kendaraan-pelanggan*') ? 'active' : '' }}"
+                       data-tooltip="Kendaraan Saya">
+                        <span class="nav-icon"><i class="fas fa-car"></i></span>
+                        <span class="nav-text">Kendaraan Saya</span>
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/rating-pelanggan"
+                       class="nav-link {{ request()->is('rating-pelanggan*') ? 'active' : '' }}"
+                       data-tooltip="Rating & Ulasan">
+                        <span class="nav-icon"><i class="fas fa-star"></i></span>
+                        <span class="nav-text">Rating & Ulasan</span>
                     </a>
                 </div>
 
@@ -576,6 +662,25 @@
                     <span class="nav-text">Rating & Ulasan</span>
                 </a>
             </div>
+
+            <div class="nav-section-title">Komisi Teknisi</div>
+            <div class="nav-item">
+                <a href="{{ route('komisi.konfigurasi.index') }}"
+                   class="nav-link {{ request()->is('komisi/konfigurasi*') ? 'active' : '' }}"
+                   data-tooltip="Konfigurasi Komisi">
+                    <span class="nav-icon"><i class="fas fa-cogs"></i></span>
+                    <span class="nav-text">Konfigurasi Komisi</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ route('komisi.index') }}"
+                   class="nav-link {{ request()->is('komisi') ? 'active' : '' }}"
+                   data-tooltip="Data Komisi">
+                    <span class="nav-icon"><i class="fas fa-money-bill-wave"></i></span>
+                    <span class="nav-text">Data Komisi</span>
+                </a>
+            </div>
+
              <div class="nav-section-title">Administrasi</div>
             <div class="nav-item">
                 <a href="/user"
