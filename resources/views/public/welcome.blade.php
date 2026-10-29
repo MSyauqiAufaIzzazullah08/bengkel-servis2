@@ -630,6 +630,7 @@
                     <span class="service-link">Lihat detail &rarr;</span>
                 </a>
 
+                {{-- [DISABLED - Kartu Spare Part dinonaktifkan karena fitur penjualan sparepart online dihapus]
                 <a href="{{ url('/sparepart-publik') }}" class="service-card">
                     <div class="service-icon">⚙️</div>
                     <h3>Spare Part</h3>
@@ -639,6 +640,7 @@
                     </p>
                     <span class="service-link">Lihat detail &rarr;</span>
                 </a>
+                --}}
 
             </div>
         </div>

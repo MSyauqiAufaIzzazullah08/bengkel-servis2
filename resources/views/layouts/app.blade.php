@@ -292,6 +292,17 @@
     </a>
 </div>
 
+<div class="nav-section-title">Keuangan</div>
+
+<div class="nav-item">
+    <a href="{{ route('konfirmasi-pembayaran.index') }}"
+       class="nav-link {{ request()->is('konfirmasi-pembayaran*') ? 'active' : '' }}"
+       data-tooltip="Konfirmasi Pembayaran">
+        <span class="nav-icon"><i class="fas fa-money-check-alt"></i></span>
+        <span class="nav-text">Konfirmasi Pembayaran</span>
+    </a>
+</div>
+
 
             @elseif ((int) session('role_id') === 4)
                 {{-- SIDEBAR KHUSUS TEKNISI --}}
@@ -335,83 +346,9 @@
                 </div>
 
 
-            @elseif ((int) session('role_id') === 9)
-                {{-- SIDEBAR KHUSUS PETUGAS SPARE PART --}}
-                <div class="nav-section-title">Menu Utama</div>
+            {{-- [DISABLED - Sidebar role 9 Petugas Spare Part dihapus karena fitur penjualan sparepart online dihapus] --}}
 
-                <div class="nav-item">
-                    <a href="/dashboard-petugas-sparepart"
-                       class="nav-link {{ request()->is('dashboard-petugas-sparepart') ? 'active' : '' }}"
-                       data-tooltip="Dashboard">
-                        <span class="nav-icon"><i class="fas fa-home"></i></span>
-                        <span class="nav-text">Dashboard</span>
-                    </a>
-                </div>
-
-                <div class="nav-section-title">Inventaris</div>
-
-                <div class="nav-item">
-                    <a href="/sparepart"
-                       class="nav-link {{ request()->is('sparepart*') ? 'active' : '' }}"
-                       data-tooltip="Stok Spare Part">
-                        <span class="nav-icon"><i class="fas fa-boxes"></i></span>
-                        <span class="nav-text">Stok Spare Part</span>
-                    </a>
-                </div>
-
-                <div class="nav-item">
-                    <a href="/kategori-sparepart"
-                       class="nav-link {{ request()->is('kategori-sparepart*') ? 'active' : '' }}"
-                       data-tooltip="Kategori Spare Part">
-                        <span class="nav-icon"><i class="fas fa-tags"></i></span>
-                        <span class="nav-text">Kategori Spare Part</span>
-                    </a>
-                </div>
-
-                <div class="nav-section-title">Pesanan</div>
-
-                <div class="nav-item">
-                    <a href="/admin-pesanan-sparepart"
-                       class="nav-link {{ request()->is('admin-pesanan-sparepart*') ? 'active' : '' }}"
-                       data-tooltip="Kelola Pesanan">
-                        <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
-                        <span class="nav-text">Kelola Pesanan</span>
-                    </a>
-                </div>
-
-            @elseif ((int) session('role_id') === 10)
-                {{-- SIDEBAR KHUSUS PETUGAS PENGIRIMAN --}}
-                <div class="nav-section-title">Menu Utama</div>
-
-                <div class="nav-item">
-                    <a href="/dashboard-petugas-pengiriman"
-                       class="nav-link {{ request()->is('dashboard-petugas-pengiriman') ? 'active' : '' }}"
-                       data-tooltip="Dashboard">
-                        <span class="nav-icon"><i class="fas fa-home"></i></span>
-                        <span class="nav-text">Dashboard</span>
-                    </a>
-                </div>
-
-                <div class="nav-section-title">Logistik</div>
-
-                <div class="nav-item">
-                    <a href="/pengiriman"
-                       class="nav-link {{ request()->is('pengiriman*') ? 'active' : '' }}"
-                       data-tooltip="Pengiriman">
-                        <span class="nav-icon"><i class="fas fa-truck"></i></span>
-                        <span class="nav-text">Pengiriman</span>
-                    </a>
-                </div>
-
-                <div class="nav-item">
-                    <a href="/ekspedisi"
-                       class="nav-link {{ request()->is('ekspedisi*') ? 'active' : '' }}"
-                       data-tooltip="Ekspedisi">
-                        <span class="nav-icon"><i class="fas fa-shipping-fast"></i></span>
-                        <span class="nav-text">Ekspedisi</span>
-                    </a>
-                </div>
-
+            {{-- [DISABLED - Sidebar role 10 Petugas Pengiriman dihapus karena fitur penjualan sparepart online dihapus] --}}
 
             @elseif ((int) session('role_id') === 6)
                 {{-- SIDEBAR KHUSUS PELANGGAN --}}
@@ -575,54 +512,9 @@
                     <span class="nav-text">Servis Panggilan</span>
                 </a>
             </div>
-             <div class="nav-section-title">Inventaris</div>
-            <div class="nav-item">
-                <a href="#"
-                   class="nav-link has-submenu {{ str_starts_with($pathAktif, 'sparepart') || str_starts_with($pathAktif, 'kategori-sparepart') ? 'open' : '' }}"
-                   data-tooltip="Spare Part">
-                    <span class="nav-icon"><i class="fas fa-boxes"></i></span>
-                    <span class="nav-text">Spare Part</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu {{ str_starts_with($pathAktif, 'sparepart') || str_starts_with($pathAktif, 'kategori-sparepart') ? 'open' : '' }}">
-                    <div class="nav-item">
-                        <a href="/sparepart"
-                           class="nav-link {{ str_starts_with($pathAktif, 'sparepart') ? 'active' : '' }}">
-                            <span class="nav-text">Daftar Spare Part</span>
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/kategori-sparepart"
-                           class="nav-link {{ str_starts_with($pathAktif, 'kategori-sparepart') ? 'active' : '' }}">
-                            <span class="nav-text">Kategori</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {{-- [DISABLED - Menu Inventaris Spare Part dihapus karena fitur penjualan sparepart online dihapus] --}}
 
-            <div class="nav-item">
-                <a href="#"
-                   class="nav-link has-submenu {{ str_starts_with($pathAktif, 'order') ? 'open' : '' }}"
-                   data-tooltip="Pesanan">
-                    <span class="nav-icon"><i class="fas fa-clipboard-list"></i></span>
-                    <span class="nav-text">Pesanan Spare Part</span>
-                    <i class="fas fa-chevron-right nav-arrow"></i>
-                </a>
-                <div class="nav-submenu {{ str_starts_with($pathAktif, 'order') ? 'open' : '' }}">
-                    <div class="nav-item">
-                        <a href="/order"
-                           class="nav-link {{ $pathAktif === 'order' ? 'active' : '' }}">
-                            <span class="nav-text">Daftar Pesanan</span>
-                        </a>
-                    </div>
-                    <div class="nav-item">
-                        <a href="/orderdetail"
-                           class="nav-link {{ str_starts_with($pathAktif, 'orderdetail') ? 'active' : '' }}">
-                            <span class="nav-text">Detail Pesanan</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+            {{-- [DISABLED - Menu Pesanan Spare Part dihapus karena fitur penjualan sparepart online dihapus] --}}
 
             <div class="nav-section-title">Keuangan</div>
             <div class="nav-item">
@@ -670,15 +562,7 @@
                 </a>
             </div>
 
-            <div class="nav-section-title">Pengiriman</div>
-            <div class="nav-item">
-                <a href="/pengiriman"
-                   class="nav-link {{ str_starts_with($pathAktif, 'pengiriman') ? 'active' : '' }}"
-                   data-tooltip="Pengiriman">
-                    <span class="nav-icon"><i class="fas fa-truck"></i></span>
-                    <span class="nav-text">Pengiriman</span>
-                </a>
-            </div>
+            {{-- [DISABLED - Menu Pengiriman dihapus karena fitur penjualan sparepart online dihapus] --}}
 
             <div class="nav-section-title">Ulasan</div>
             <div class="nav-item">

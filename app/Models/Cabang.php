@@ -17,13 +17,23 @@ class Cabang extends Model
         'status',
     ];
 
+    public function bookingServis()
+    {
+        return $this->hasMany(BookingServis::class, 'id_cabang', 'id_cabang');
+    }
+
     public function operasionalCabang()
     {
-        return $this->hasMany(OperasionalCabang::class, 'id_cabang', 'id_cabang');
+        return $this->hasMany(OperasionalCabang::class, 'cabang_id', 'id_cabang');
     }
 
     public function adminCabang()
     {
         return $this->hasMany(AdminCabang::class, 'cabang_id', 'id_cabang');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'cabang_id', 'id_cabang');
     }
 }

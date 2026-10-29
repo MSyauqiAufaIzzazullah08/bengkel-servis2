@@ -168,13 +168,22 @@ class PelangganBookingController extends Controller
             abort(403, 'Data pelanggan tidak ditemukan.');
         }
 
+        // Cek apakah layanan yang dipilih bernama "Lainnya"
+        $layananDipilih = DB::table('layananservis')
+            ->where('id_layanan', $request->layanan_id)
+            ->first();
+        $isLainnya = $layananDipilih &&
+            strtolower(trim($layananDipilih->nama_layanan)) === 'lainnya';
+
         $data = $request->validate([
             'id_kendaraan' => 'required|integer',
             'id_cabang' => 'required|integer',
             'layanan_id' => 'required|integer',
             'tanggal_booking' => 'required|date|after_or_equal:today',
             'waktu_booking' => 'required|date_format:H:i',
-            'catatan' => 'nullable|string|max:2000',
+            'catatan' => ($isLainnya ? 'required' : 'nullable') . '|string|max:2000',
+        ], [
+            'catatan.required' => 'Deskripsi keluhan wajib diisi jika memilih layanan "Lainnya".',
         ]);
 
         $kendaraanValid = DB::table('kendaraan')

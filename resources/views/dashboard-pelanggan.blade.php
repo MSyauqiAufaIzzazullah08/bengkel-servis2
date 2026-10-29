@@ -637,6 +637,7 @@
             <span class="nav-icon">🚗</span> Kendaraan Saya
         </a>
 
+        {{-- [DISABLED - Menu Katalog Spare Part dan Pesanan Spare Part dinonaktifkan karena fitur penjualan sparepart online dihapus]
         <a href="/sparepart-pelanggan" class="nav-link">
             <span class="nav-icon">🔩</span> Katalog Spare Part
         </a>
@@ -644,6 +645,7 @@
         <a href="/order-pelanggan" class="nav-link">
             <span class="nav-icon">🛒</span> Pesanan Spare Part
         </a>
+        --}}
 
         <a href="/pembayaran-pelanggan" class="nav-link">
             <span class="nav-icon">💳</span> Pembayaran
@@ -657,7 +659,7 @@
             <strong>Butuh bantuan?</strong>
             <p>
                 Pastikan kamu memilih layanan dan cabang yang sesuai
-                sebelum melakukan booking atau membeli spare part.
+                sebelum melakukan booking servis.
             </p>
             <a href="/layanan-pelanggan">Lihat layanan →</a>
         </div>
@@ -780,6 +782,7 @@
                 <span class="service-link">Lihat kendaraan →</span>
             </a>
 
+            {{-- [DISABLED - Kartu Belanja Spare Part dan Pesanan Spare Part dinonaktifkan karena fitur penjualan sparepart online dihapus]
             <a href="/sparepart-pelanggan" class="service-card">
                 <div class="service-icon">🔩</div>
                 <h3>Belanja Spare Part</h3>
@@ -798,6 +801,7 @@
                 </p>
                 <span class="service-link">Lihat pesanan →</span>
             </a>
+            --}}
 
             <a href="/pembayaran-pelanggan" class="service-card">
                 <div class="service-icon">💳</div>

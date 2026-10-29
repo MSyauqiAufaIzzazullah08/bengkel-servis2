@@ -16,6 +16,7 @@ class Pelanggan extends Model
         'no_hp',
         'alamat',
         'tanggal_daftar',
+        'user_id',
     ];
 
     public function kendaraan()

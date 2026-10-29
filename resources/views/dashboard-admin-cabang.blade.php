@@ -139,11 +139,13 @@
         <p>Lihat dan kelola data teknisi.</p>
     </a>
 
+    {{-- [DISABLED - Menu Spare Part dinonaktifkan karena fitur penjualan sparepart online dihapus]
     <a href="/sparepart" class="admin-menu-card">
         <div class="admin-menu-icon"><i class="fas fa-boxes"></i></div>
         <h3>Spare Part</h3>
         <p>Kelola data dan stok suku cadang.</p>
     </a>
+    --}}
 
     <a href="/operasional" class="admin-menu-card">
         <div class="admin-menu-icon"><i class="fas fa-chart-line"></i></div>
@@ -151,11 +153,13 @@
         <p>Informasi operasional dan laporan cabang.</p>
     </a>
 
+    {{-- [DISABLED - Menu Pesanan Spare Part dinonaktifkan karena fitur penjualan sparepart online dihapus]
     <a href="/admin-pesanan-sparepart" class="admin-menu-card">
         <div class="admin-menu-icon"><i class="fas fa-shopping-cart"></i></div>
         <h3>Pesanan Spare Part</h3>
         <p>Lihat dan proses pesanan suku cadang.</p>
     </a>
+    --}}
 
     <a href="/homeservice" class="admin-menu-card">
         <div class="admin-menu-icon"><i class="fas fa-motorcycle"></i></div>
@@ -173,6 +177,19 @@
         <p>
             Lihat dan kelola pembayaran layanan Home Service
             pelanggan setelah servis selesai.
+        </p>
+    </a>
+
+    {{-- MENU BARU: KONFIRMASI PEMBAYARAN --}}
+    <a href="{{ route('konfirmasi-pembayaran.index') }}"
+       class="admin-menu-card">
+        <div class="admin-menu-icon">
+            <i class="fas fa-money-check-alt"></i>
+        </div>
+        <h3>Konfirmasi Pembayaran</h3>
+        <p>
+            ACC atau tolak pembayaran Booking Servis &amp; Home Service
+            yang masih menunggu konfirmasi dari cabang Anda.
         </p>
     </a>
 

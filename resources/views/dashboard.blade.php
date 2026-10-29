@@ -491,6 +491,7 @@
                 ['Data Teknisi', '/teknisi', 'fa-hard-hat'],
                 ['Montir Lapangan', '/montirlapangan', 'fa-screwdriver-wrench'],
             ],
+            /* [DISABLED - Kategori INVENTARIS & TRANSAKSI dengan link sparepart dinonaktifkan]
             'INVENTARIS & TRANSAKSI' => [
                 ['Kategori Spare Part', '/kategori-sparepart', 'fa-folder'],
                 ['Data Spare Part', '/sparepart', 'fa-gears'],
@@ -498,6 +499,13 @@
                 ['Detail Pesanan', '/orderdetail', 'fa-boxes-stacked'],
                 ['Pengiriman', '/pengiriman', 'fa-truck'],
                 ['Ekspedisi', '/ekspedisi', 'fa-truck-fast'],
+                ['Promo', '/promo', 'fa-tags'],
+                ['Metode Pembayaran', '/metodepembayaran', 'fa-credit-card'],
+                ['Data Pembayaran', '/pembayaran', 'fa-money-bill-wave'],
+                ['Rating & Ulasan', '/rating', 'fa-star'],
+            ],
+            */
+            'TRANSAKSI' => [
                 ['Promo', '/promo', 'fa-tags'],
                 ['Metode Pembayaran', '/metodepembayaran', 'fa-credit-card'],
                 ['Data Pembayaran', '/pembayaran', 'fa-money-bill-wave'],
@@ -519,9 +527,15 @@
                 ['Data Kendaraan', '/kendaraan', 'fa-car'],
                 ['Data Teknisi', '/teknisi', 'fa-hard-hat'],
             ],
+            /* [DISABLED - Kategori INVENTARIS & TRANSAKSI dengan link sparepart dinonaktifkan untuk role 2]
             'INVENTARIS & TRANSAKSI' => [
                 ['Spare Part', '/sparepart', 'fa-gears'],
                 ['Pesanan Spare Part', '/order', 'fa-box-open'],
+                ['Pembayaran', '/pembayaran', 'fa-credit-card'],
+                ['Rating & Ulasan', '/rating', 'fa-star'],
+            ],
+            */
+            'TRANSAKSI' => [
                 ['Pembayaran', '/pembayaran', 'fa-credit-card'],
                 ['Rating & Ulasan', '/rating', 'fa-star'],
             ],

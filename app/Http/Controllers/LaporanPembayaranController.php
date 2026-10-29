@@ -23,10 +23,14 @@ class LaporanPembayaranController extends Controller
 
         $query = Pembayaran::with([
             'bookingServis.pelanggan',
-            'orderSparePart.pelanggan',
+            'homeServis.pelanggan',
             'metodePembayaran',
             'promo',
-        ]);
+        ])
+        ->where(function ($q) {
+            $q->whereNotNull('id_booking')
+              ->orWhereNotNull('id_home_service');
+        });
 
         if ($tanggalMulai) {
             $query->whereDate('tanggal_bayar', '>=', $tanggalMulai);
@@ -71,10 +75,14 @@ class LaporanPembayaranController extends Controller
 
         $query = Pembayaran::with([
             'bookingServis.pelanggan',
-            'orderSparePart.pelanggan',
+            'homeServis.pelanggan',
             'metodePembayaran',
             'promo',
-        ]);
+        ])
+        ->where(function ($q) {
+            $q->whereNotNull('id_booking')
+              ->orWhereNotNull('id_home_service');
+        });
 
         if ($tanggalMulai) {
             $query->whereDate('tanggal_bayar', '>=', $tanggalMulai);

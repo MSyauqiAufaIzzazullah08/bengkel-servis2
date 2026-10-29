@@ -13,7 +13,6 @@ class CabangController extends Controller
             'bookingServis',
             'adminCabang.user',
             'operasionalCabang',
-            'penugasanTeknisi.teknisi',
             'users'
         ])->get();
 

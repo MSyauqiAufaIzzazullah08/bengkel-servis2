@@ -22,6 +22,9 @@ class Pembayaran extends Model
         'status',
         'tanggal_bayar',
         'bukti_pembayaran',
+        'alasan_penolakan',
+        'verified_by',
+        'verified_at',
     ];
 
     public function bookingServis()

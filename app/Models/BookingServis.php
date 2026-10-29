@@ -20,6 +20,8 @@ class BookingServis extends Model
         'waktu_booking',
         'status',
         'catatan',
+        'sumber_pendaftaran',
+        'didaftarkan_oleh',
     ];
 
     public function pelanggan()
@@ -92,5 +94,10 @@ class BookingServis extends Model
             'id_booking',
             'id_booking'
         );
+    }
+
+    public function laporanServis()
+    {
+        return $this->hasOne(LaporanServis::class, 'booking_id', 'id_booking');
     }
 }

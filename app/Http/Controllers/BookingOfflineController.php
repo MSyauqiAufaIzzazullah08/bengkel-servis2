@@ -118,6 +118,11 @@ class BookingOfflineController extends Controller
     {
         $cabangId = $this->resolveCabangId();
 
+        // Cek apakah layanan yang dipilih bernama "Lainnya"
+        $layananDipilih = \App\Models\LayananServis::find($request->layanan_id);
+        $isLainnya = $layananDipilih &&
+            strtolower(trim($layananDipilih->nama_layanan)) === 'lainnya';
+
         $request->validate([
             'nama_pelanggan'  => 'required|string|max:100',
             'no_hp'           => 'required|string|max:20',
@@ -129,7 +134,9 @@ class BookingOfflineController extends Controller
             'layanan_id'      => 'required|integer|exists:layananservis,id_layanan',
             'tanggal_booking' => 'required|date',
             'waktu_booking'   => 'required',
-            'catatan'         => 'nullable|string|max:500',
+            'catatan'         => ($isLainnya ? 'required' : 'nullable') . '|string|max:500',
+        ], [
+            'catatan.required' => 'Deskripsi keluhan wajib diisi jika memilih layanan "Lainnya".',
         ]);
 
         $nopol = strtoupper(trim($request->nopol));

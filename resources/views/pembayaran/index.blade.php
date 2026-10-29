@@ -97,11 +97,13 @@
                                 Home Service #{{ $item->id_home_service }}
                             </div>
 
+                        {{-- [DISABLED - Blok order sparepart dinonaktifkan karena fitur penjualan sparepart online dihapus]
                         @elseif ($item->id_order && $item->orderSparePart)
                             {{ $item->orderSparePart->pelanggan->nama ?? '-' }}
                             <div style="font-size:0.72rem;color:var(--color-text-muted)">
                                 Order #{{ $item->id_order }}
                             </div>
+                        --}}
 
                         @else
                             <span style="color:var(--color-text-muted)">-</span>
@@ -113,8 +115,7 @@
                             <span class="badge badge-primary">Booking</span>
                         @elseif ($item->id_home_service)
                             <span class="badge badge-info">Home Service</span>
-                        @elseif ($item->id_order)
-                            <span class="badge badge-secondary">Spare Part</span>
+                        {{-- [DISABLED] @elseif ($item->id_order) <span class="badge badge-secondary">Spare Part</span> --}}
                         @else
                             <span class="badge">-</span>
                         @endif

@@ -72,19 +72,9 @@
                     </div>
                 </div>
 
+                {{-- [DISABLED - Dropdown Spare Part dihapus karena fitur penjualan sparepart online dinonaktifkan. Kolom id_sparepart di database tetap ada.] --}}
+
                 <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label">Spare Part <small style="color:var(--color-text-muted)">(opsional)</small></label>
-                        <select name="id_sparepart" class="form-control">
-                            <option value="">-- Tanpa Spare Part --</option>
-                            @foreach ($sparepart as $s)
-                                <option value="{{ $s->id_sparepart }}"
-                                    {{ old('id_sparepart') == $s->id_sparepart ? 'selected' : '' }}>
-                                    {{ $s->nama }} (Stok: {{ $s->stok }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
                     <div class="form-group">
                         <label class="form-label">Harga (Rp) <span style="color:red">*</span></label>
                         <input type="number" name="harga" class="form-control"

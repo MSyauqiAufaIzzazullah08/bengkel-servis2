@@ -178,10 +178,12 @@
             <div class="form-row">
                 <div class="mb-3">
                     <label class="form-label">Layanan <span class="text-danger">*</span></label>
-                    <select name="layanan_id" class="form-control @error('layanan_id') is-invalid @enderror" required>
+                    <select name="layanan_id" class="form-control @error('layanan_id') is-invalid @enderror" required
+                            id="select_layanan_offline" onchange="toggleCatatanRequired(this)">
                         <option value="">— Pilih Layanan —</option>
                         @foreach ($layanans as $l)
                             <option value="{{ $l->id_layanan }}"
+                                data-nama="{{ strtolower($l->nama_layanan) }}"
                                 {{ old('layanan_id') == $l->id_layanan ? 'selected' : '' }}>
                                 {{ $l->nama_layanan }}
                                 @if ($l->harga) (Rp {{ number_format($l->harga, 0, ',', '.') }}) @endif
@@ -209,11 +211,18 @@
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Catatan / Keluhan Awal</label>
-                <textarea name="catatan" rows="3"
+                <label class="form-label" id="label_catatan">
+                    Catatan / Keluhan Awal
+                    <span id="catatan_required_mark" style="display:none;color:#dc3545"> *</span>
+                </label>
+                <textarea name="catatan" id="catatan_offline" rows="3"
                           class="form-control @error('catatan') is-invalid @enderror"
                           placeholder="Keluhan awal atau catatan tambahan">{{ old('catatan') }}</textarea>
                 @error('catatan')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <div id="catatan_hint" style="display:none;font-size:.8rem;color:#6c757d;margin-top:.3rem">
+                    <i class="fas fa-info-circle"></i>
+                    Layanan "Lainnya" dipilih — jelaskan keluhan atau kebutuhan servis secara spesifik.
+                </div>
             </div>
         </div>
 
@@ -229,6 +238,29 @@
 
 @section('scripts')
 <script>
+function toggleCatatanRequired(selectEl) {
+    const isLainnya = selectEl.options[selectEl.selectedIndex]
+        ?.getAttribute('data-nama') === 'lainnya';
+    const textarea = document.getElementById('catatan_offline');
+    const hint = document.getElementById('catatan_hint');
+    const mark = document.getElementById('catatan_required_mark');
+    if (isLainnya) {
+        textarea.required = true;
+        hint.style.display = 'block';
+        mark.style.display = 'inline';
+    } else {
+        textarea.required = false;
+        hint.style.display = 'none';
+        mark.style.display = 'none';
+    }
+}
+
+// Init saat halaman load (saat ada old input)
+document.addEventListener('DOMContentLoaded', function () {
+    const sel = document.getElementById('select_layanan_offline');
+    if (sel) toggleCatatanRequired(sel);
+});
+
 function cariPelanggan() {
     const noHp = document.getElementById('input_no_hp').value.trim();
     if (!noHp) { alert('Masukkan nomor HP terlebih dahulu.'); return; }

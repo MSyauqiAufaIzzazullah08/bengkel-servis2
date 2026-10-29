@@ -17,6 +17,9 @@ class PenugasanTeknisi extends Model
         'tanggal',
         'status',
         'catatan',
+        'metode_pemilihan',
+        'ditetapkan_oleh',
+        'tanggal_selesai',
     ];
 
     public function bookingServis()
@@ -35,5 +38,10 @@ class PenugasanTeknisi extends Model
             'id_teknisi',
             'id_teknisi'
         );
+    }
+
+    public function laporanServis()
+    {
+        return $this->hasOne(LaporanServis::class, 'penugasan_id', 'id_penugasan');
     }
 }

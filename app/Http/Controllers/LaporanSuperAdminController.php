@@ -111,7 +111,7 @@ class LaporanSuperAdminController extends Controller
 
         // --- Tren bulanan 12 bulan terakhir ---
         $trenBulanan = DB::table('bookingservis')
-            ->where('created_at', '>=', Carbon::now()->subMonths(12)->startOfMonth())
+            ->where('tanggal_booking', '>=', Carbon::now()->subMonths(12)->startOfMonth())
             ->select(
                 DB::raw("DATE_FORMAT(tanggal_booking, '%Y-%m') as bulan"),
                 DB::raw('COUNT(*) as jumlah')

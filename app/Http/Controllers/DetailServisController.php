@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\DetailServis;
 use App\Models\BookingServis;
 use App\Models\LayananServis;
-use App\Models\SparePart;
+// SparePart: model masih ada di database, tidak dimuat di controller karena field tidak digunakan di UI
 use Illuminate\Http\Request;
 
 class DetailServisController extends Controller
@@ -31,12 +31,10 @@ class DetailServisController extends Controller
 
         $layanan = LayananServis::all();
 
-        $sparepart = SparePart::all();
-
+        // id_sparepart: kolom database tetap ada untuk data historis, tidak ditampilkan di form
         return view('detailservis.create', compact(
             'booking',
-            'layanan',
-            'sparepart'
+            'layanan'
         ));
     }
 
@@ -45,7 +43,7 @@ class DetailServisController extends Controller
         $request->validate([
             'booking_id' => 'required',
             'layanan_id' => 'required',
-            'id_sparepart' => 'nullable',
+            // id_sparepart: tidak divalidasi/diisi dari form, kolom database tetap ada
             'harga' => 'required|numeric',
             'catatan' => 'nullable',
         ]);
@@ -53,7 +51,7 @@ class DetailServisController extends Controller
         DetailServis::create([
             'booking_id' => $request->booking_id,
             'layanan_id' => $request->layanan_id,
-            'id_sparepart' => $request->id_sparepart ?: null,
+            // id_sparepart tidak diisi — kolom tetap ada di database untuk data historis
             'harga' => $request->harga,
             'catatan' => $request->catatan,
         ]);
@@ -72,13 +70,11 @@ class DetailServisController extends Controller
 
         $layanan = LayananServis::all();
 
-        $sparepart = SparePart::all();
-
+        // id_sparepart: kolom database tetap ada untuk data historis, tidak ditampilkan di form
         return view('detailservis.edit', compact(
             'detail',
             'booking',
-            'layanan',
-            'sparepart'
+            'layanan'
         ));
     }
 
@@ -87,7 +83,7 @@ class DetailServisController extends Controller
         $request->validate([
             'booking_id' => 'required',
             'layanan_id' => 'required',
-            'id_sparepart' => 'nullable',
+            // id_sparepart: tidak divalidasi/diisi dari form, kolom database tetap ada
             'harga' => 'required|numeric',
             'catatan' => 'nullable',
         ]);
@@ -97,7 +93,7 @@ class DetailServisController extends Controller
         $detail->update([
             'booking_id' => $request->booking_id,
             'layanan_id' => $request->layanan_id,
-            'id_sparepart' => $request->id_sparepart ?: null,
+            // id_sparepart tidak disentuh — tetap menyimpan nilai historis
             'harga' => $request->harga,
             'catatan' => $request->catatan,
         ]);

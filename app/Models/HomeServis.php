@@ -20,6 +20,7 @@ class HomeServis extends Model
         'tanggal',
         'status',
         'catatan',
+        'id_laporan_servis',
     ];
 
     public function pelanggan()

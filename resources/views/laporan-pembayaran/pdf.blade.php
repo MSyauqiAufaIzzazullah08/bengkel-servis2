@@ -92,11 +92,11 @@
             @forelse ($pembayaran as $item)
                 @php
                     $pelanggan = $item->bookingServis?->pelanggan
-                        ?? $item->orderSparePart?->pelanggan;
+                        ?? $item->homeServis?->pelanggan;
 
                     $jenis = $item->id_booking
                         ? 'Servis Bengkel'
-                        : ($item->id_order ? 'Spare Part' : 'Lainnya');
+                        : ($item->id_home_service ? 'Home Service' : 'Lainnya');
                 @endphp
                 <tr>
                     <td>{{ $loop->iteration }}</td>

@@ -534,11 +534,13 @@
                             Layanan Servis <span class="required">*</span>
                         </label>
 
-                        <select name="layanan_id" id="layanan_id" required>
+                        <select name="layanan_id" id="layanan_id" required
+                            onchange="toggleCatatanPelanggan(this)">
                             <option value="">-- Pilih layanan servis --</option>
                             @foreach ($layanan as $item)
                                 <option
                                     value="{{ $item->id_layanan }}"
+                                    data-nama="{{ strtolower($item->nama_layanan) }}"
                                     {{ old('layanan_id') == $item->id_layanan ? 'selected' : '' }}
                                 >
                                     {{ $item->nama_layanan }} - Rp {{ number_format($item->harga, 0, ',', '.') }}
@@ -577,7 +579,11 @@
                     </div>
 
                     <div class="group full-width">
-                        <label for="catatan">Catatan (Opsional)</label>
+                        <label for="catatan" id="label_catatan">
+                            Catatan
+                            <span id="catatan_required_mark" style="display:none;color:#C2410C"> *</span>
+                            <span id="catatan_optional" style="">(Opsional)</span>
+                        </label>
 
                         <textarea
                             name="catatan"
@@ -586,8 +592,11 @@
                             placeholder="Ceritakan keluhan kendaraan kamu..."
                         >{{ old('catatan') }}</textarea>
 
-                        <p class="field-help">
+                        <p class="field-help" id="catatan_help_default">
                             Contoh: mesin sulit dinyalakan, rem berbunyi, atau perlu ganti oli.
+                        </p>
+                        <p class="field-help" id="catatan_help_lainnya" style="display:none;color:#C2410C">
+                            Layanan "Lainnya" dipilih — wajib jelaskan keluhan atau kebutuhan servis secara spesifik.
                         </p>
                     </div>
                 </div>
@@ -660,6 +669,37 @@
 <footer>
     © {{ date('Y') }} BengkelServis — Portal Pelanggan
 </footer>
+<script>
+function toggleCatatanPelanggan(selectEl) {
+    const isLainnya = selectEl.options[selectEl.selectedIndex]
+        ?.getAttribute('data-nama') === 'lainnya';
+    const textarea = document.getElementById('catatan');
+    const helpDefault = document.getElementById('catatan_help_default');
+    const helpLainnya = document.getElementById('catatan_help_lainnya');
+    const mark = document.getElementById('catatan_required_mark');
+    const optional = document.getElementById('catatan_optional');
+    if (isLainnya) {
+        textarea.required = true;
+        textarea.placeholder = 'Wajib: jelaskan keluhan atau kebutuhan servis secara spesifik...';
+        helpDefault.style.display = 'none';
+        helpLainnya.style.display = '';
+        mark.style.display = 'inline';
+        optional.style.display = 'none';
+    } else {
+        textarea.required = false;
+        textarea.placeholder = 'Ceritakan keluhan kendaraan kamu...';
+        helpDefault.style.display = '';
+        helpLainnya.style.display = 'none';
+        mark.style.display = 'none';
+        optional.style.display = '';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const sel = document.getElementById('layanan_id');
+    if (sel && sel.value) toggleCatatanPelanggan(sel);
+});
+</script>
 
 </body>
 </html>

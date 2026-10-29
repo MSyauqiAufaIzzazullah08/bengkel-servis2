@@ -415,6 +415,7 @@
             <a href="{{ url('/montirlapangan') }}">🛠️ Montir Lapangan</a>
         </nav>
 
+        {{-- [DISABLED - Blok INVENTARIS & TRANSAKSI dihapus karena fitur penjualan sparepart online dinonaktifkan]
         <div class="menu-label">INVENTARIS & TRANSAKSI</div>
         <nav class="menu">
             <a href="{{ url('/kategori-sparepart') }}">🗂️ Kategori Spare Part</a>
@@ -425,6 +426,13 @@
             <a href="{{ url('/ekspedisi') }}">🚛 Ekspedisi</a>
             <a href="{{ url('/promo') }}">🏷️ Promo</a>
             <a href="{{ url('/metodepembayaran') }}">💳 Metode Pembayaran</a>
+            <a href="{{ url('/pembayaran') }}">💰 Data Pembayaran</a>
+            <a href="{{ url('/rating') }}">⭐ Rating & Ulasan</a>
+        </nav>
+        --}}
+
+        <div class="menu-label">TRANSAKSI</div>
+        <nav class="menu">
             <a href="{{ url('/pembayaran') }}">💰 Data Pembayaran</a>
             <a href="{{ url('/rating') }}">⭐ Rating & Ulasan</a>
         </nav>
@@ -482,12 +490,7 @@
                     <span class="card-link">Kelola pengguna →</span>
                 </a>
 
-                <a class="card" href="{{ url('/admin-pesanan-sparepart') }}">
-                    <div class="card-icon">📦</div>
-                    <h3>Kelola Pesanan Spare Part</h3>
-                    <p>Lihat pesanan pelanggan, periksa rincian barang, dan perbarui status pesanan.</p>
-                    <span class="card-link">Kelola pesanan →</span>
-                </a>
+                {{-- [DISABLED] Kelola Pesanan Spare Part - route /admin-pesanan-sparepart dinonaktifkan --}}
 
                 <a class="card" href="{{ url('/role') }}">
                     <div class="card-icon">🛡️</div>
@@ -545,12 +548,7 @@
                     <span class="card-link">Kelola teknisi →</span>
                 </a>
 
-                <a class="card" href="{{ url('/sparepart') }}">
-                    <div class="card-icon">⚙️</div>
-                    <h3>Spare Part</h3>
-                    <p>Pantau persediaan dan informasi suku cadang.</p>
-                    <span class="card-link">Kelola spare part →</span>
-                </a>
+                {{-- [DISABLED] Spare Part - route /sparepart dinonaktifkan --}}
 
                 <a class="card" href="{{ url('/pembayaran') }}">
                     <div class="card-icon">💳</div>

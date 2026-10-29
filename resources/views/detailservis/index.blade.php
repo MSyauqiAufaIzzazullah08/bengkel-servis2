@@ -64,7 +64,6 @@
                         <th>#</th>
                         <th>Booking</th>
                         <th>Layanan</th>
-                        <th>Spare Part</th>
                         <th>Harga</th>
                         <th>Catatan</th>
                         <th>Aksi</th>
@@ -83,7 +82,7 @@
                                 </div>
                             </td>
                             <td style="font-size:0.84rem">{{ $item->layananServis->nama_layanan ?? '-' }}</td>
-                            <td style="font-size:0.82rem">{{ $item->sparePart->nama ?? '-' }}</td>
+                            {{-- [DISABLED - Kolom Spare Part dihapus dari tampilan. id_sparepart di database tetap ada.] --}}
                             <td style="font-size:0.85rem;font-weight:600">
                                 Rp {{ number_format($item->harga, 0, ',', '.') }}
                             </td>
@@ -111,7 +110,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7">
+                            <td colspan="6">
                                 <div class="table-empty">
                                     <i class="fas fa-clipboard-list"></i>
                                     <p>Belum ada data detail servis.</p>

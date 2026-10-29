@@ -7,7 +7,15 @@ use App\Http\Controllers\RegistrasiController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\BookingServisController;
-use App\Http\Controllers\OrderSparePartController;
+// [DISABLED - Fitur penjualan sparepart online dihapus]
+// use App\Http\Controllers\OrderSparePartController;
+// use App\Http\Controllers\SparePartController;
+// use App\Http\Controllers\KategoriSparePartController;
+// use App\Http\Controllers\OrderDetailController;
+// use App\Http\Controllers\PengirimanController;
+// use App\Http\Controllers\EkspedisiController;
+// use App\Http\Controllers\PelangganSparePartController;
+// use App\Http\Controllers\AdminPesananSparePartController;
 use App\Http\Controllers\HomeServisController;
 use App\Http\Controllers\CabangController;
 use App\Http\Controllers\TeknisiController;
@@ -16,11 +24,6 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminCabangController;
 use App\Http\Controllers\OperasionalCabangController;
-use App\Http\Controllers\SparePartController;
-use App\Http\Controllers\KategoriSparePartController;
-use App\Http\Controllers\OrderDetailController;
-use App\Http\Controllers\PengirimanController;
-use App\Http\Controllers\EkspedisiController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\LayananServisController;
@@ -32,8 +35,6 @@ use App\Http\Controllers\PelangganBookingController;
 use App\Http\Controllers\PelangganKendaraanController;
 use App\Http\Controllers\PelangganPembayaranController;
 use App\Http\Controllers\PelangganRatingController;
-use App\Http\Controllers\PelangganSparePartController;
-use App\Http\Controllers\AdminPesananSparePartController;
 use App\Http\Controllers\DashboardMontirLapanganController;
 use App\Http\Controllers\PembayaranHomeServisController;
 use App\Http\Controllers\LaporanCabangController;
@@ -81,9 +82,10 @@ Route::get('/home-service-publik', function () {
     return view('public.home-service-publik');
 });
 
-Route::get('/sparepart-publik', function () {
-    return view('public.sparepart');
-});
+// [DISABLED - Fitur penjualan sparepart online dihapus]
+// Route::get('/sparepart-publik', function () {
+//     return view('public.sparepart');
+// });
 
 /*
 |--------------------------------------------------------------------------
@@ -93,7 +95,7 @@ Route::get('/sparepart-publik', function () {
 
 
 
-Route::middleware('role:1,2,3,4,5,6,9,10')->group(function () {
+Route::middleware('role:1,2,3,4,5,6')->group(function () {
     Route::get('/dashboard', function () {
         return match ((int) session('role_id')) {
             1 => redirect('/dashboard-super-admin'),
@@ -102,9 +104,10 @@ Route::middleware('role:1,2,3,4,5,6,9,10')->group(function () {
             4 => redirect('/dashboard-teknisi'),
             5 => redirect('/dashboard-montir-lapangan'),
             6 => redirect('/dashboard-pelanggan'),
-            9 => redirect('/dashboard-petugas-sparepart'),
-            10 => redirect('/dashboard-petugas-pengiriman'),
-            default => view('dashboard'),
+            // [DISABLED - Role 9 & 10 terkait fitur sparepart online yang dihapus]
+            // 9 => redirect('/dashboard-petugas-sparepart'),
+            // 10 => redirect('/dashboard-petugas-pengiriman'),
+            default => abort(403, 'Role tidak dikenal atau tidak aktif.'),
         };
     });
 });
@@ -115,15 +118,16 @@ Route::middleware('role:6')->group(function () {
         return view('dashboard-pelanggan');
     });
 
-    Route::get('/pembayaran-sparepart/{id_order}', [
-    \App\Http\Controllers\PelangganPembayaranController::class,
-    'formSparePart'
-]);
+    // [DISABLED - Fitur penjualan sparepart online dihapus]
+    // Route::get('/pembayaran-sparepart/{id_order}', [
+    //     \App\Http\Controllers\PelangganPembayaranController::class,
+    //     'formSparePart'
+    // ]);
 
-Route::post('/pembayaran-sparepart/{id_order}', [
-    \App\Http\Controllers\PelangganPembayaranController::class,
-    'storeSparePart'
-]);
+    // Route::post('/pembayaran-sparepart/{id_order}', [
+    //     \App\Http\Controllers\PelangganPembayaranController::class,
+    //     'storeSparePart'
+    // ]);
 
     // Form booking khusus pelanggan
     Route::get(
@@ -215,24 +219,23 @@ Route::middleware('role:6')->group(function () {
 });
 
 
-Route::middleware('role:6')->group(function () {
-    Route::get(
-        '/order-pelanggan',
-        [OrderSparePartController::class, 'pesananPelanggan']
-    );
-
-    
-Route::get('/pembayaran-sparepart/{id_order}', [
-    \App\Http\Controllers\PelangganPembayaranController::class,
-    'formSparePart'
-]);
-
-Route::post('/pembayaran-sparepart/{id_order}', [
-    \App\Http\Controllers\PelangganPembayaranController::class,
-    'storeSparePart'
-]);
-
-});
+// [DISABLED - Fitur penjualan sparepart online dihapus]
+// Route::middleware('role:6')->group(function () {
+//     Route::get(
+//         '/order-pelanggan',
+//         [OrderSparePartController::class, 'pesananPelanggan']
+//     );
+//
+//     Route::get('/pembayaran-sparepart/{id_order}', [
+//         \App\Http\Controllers\PelangganPembayaranController::class,
+//         'formSparePart'
+//     ]);
+//
+//     Route::post('/pembayaran-sparepart/{id_order}', [
+//         \App\Http\Controllers\PelangganPembayaranController::class,
+//         'storeSparePart'
+//     ]);
+// });
 
 // RATING DAN ULASAN KHUSUS PELANGGAN
 Route::middleware('role:6')->group(function () {
@@ -253,59 +256,61 @@ Route::middleware('role:6')->group(function () {
 });
 
 
- // KATALOG, KERANJANG, DAN CHECKOUT SPARE PART PELANGGAN
-Route::middleware('role:6')->group(function () {
-    Route::get('/sparepart-pelanggan', [
-        PelangganSparePartController::class,
-        'index'
-    ]);
+// [DISABLED - Fitur penjualan sparepart online dihapus]
+// KATALOG, KERANJANG, DAN CHECKOUT SPARE PART PELANGGAN
+// Route::middleware('role:6')->group(function () {
+//     Route::get('/sparepart-pelanggan', [
+//         PelangganSparePartController::class,
+//         'index'
+//     ]);
+//
+//     Route::post('/keranjang-sparepart', [
+//         PelangganSparePartController::class,
+//         'tambahKeranjang'
+//     ]);
+//
+//     Route::get('/keranjang-sparepart', [
+//         PelangganSparePartController::class,
+//         'keranjang'
+//     ]);
+//
+//     Route::delete('/keranjang-sparepart/{id}', [
+//         PelangganSparePartController::class,
+//         'hapusKeranjang'
+//     ]);
+//
+//     Route::get('/checkout-sparepart', [
+//         PelangganSparePartController::class,
+//         'checkout'
+//     ]);
+//
+//     Route::post('/checkout-sparepart', [
+//         PelangganSparePartController::class,
+//         'prosesCheckout'
+//     ]);
+//
+//     Route::get('/checkout-sparepart/berhasil/{id}', [
+//         PelangganSparePartController::class,
+//         'pesananBerhasil'
+//     ]);
+// });
 
-    Route::post('/keranjang-sparepart', [
-        PelangganSparePartController::class,
-        'tambahKeranjang'
-    ]);
-
-    Route::get('/keranjang-sparepart', [
-        PelangganSparePartController::class,
-        'keranjang'
-    ]);
-
-    Route::delete('/keranjang-sparepart/{id}', [
-        PelangganSparePartController::class,
-        'hapusKeranjang'
-    ]);
-
-    Route::get('/checkout-sparepart', [
-        PelangganSparePartController::class,
-        'checkout'
-    ]);
-
-    Route::post('/checkout-sparepart', [
-        PelangganSparePartController::class,
-        'prosesCheckout'
-    ]);
-
-    Route::get('/checkout-sparepart/berhasil/{id}', [
-        PelangganSparePartController::class,
-        'pesananBerhasil'
-    ]);
-});
 
 
 
-
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // ADMIN - PENGELOLAAN PESANAN SPARE PART
-Route::middleware('role:1,2,9')->group(function () {
-    Route::get(
-        '/admin-pesanan-sparepart',
-        [AdminPesananSparePartController::class, 'index']
-    );
-
-    Route::put(
-        '/admin-pesanan-sparepart/{id}/status',
-        [AdminPesananSparePartController::class, 'updateStatus']
-    );
-});
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::get(
+//         '/admin-pesanan-sparepart',
+//         [AdminPesananSparePartController::class, 'index']
+//     );
+//
+//     Route::put(
+//         '/admin-pesanan-sparepart/{id}/status',
+//         [AdminPesananSparePartController::class, 'updateStatus']
+//     );
+// });
 
 /*
 |--------------------------------------------------------------------------
@@ -493,21 +498,23 @@ Route::middleware('role:1,2')->group(function () {
     )->except(['show']);
 });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // KATEGORI SPAREPART
-Route::middleware('role:1,2,9')->group(function () {
-    Route::resource(
-        '/kategori-sparepart',
-        KategoriSparePartController::class
-    )->except(['show']);
-});
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::resource(
+//         '/kategori-sparepart',
+//         KategoriSparePartController::class
+//     )->except(['show']);
+// });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // DATA SPAREPART
-Route::middleware('role:1,2,9')->group(function () {
-    Route::resource(
-        '/sparepart',
-        SparePartController::class
-    )->except(['show']);
-});
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::resource(
+//         '/sparepart',
+//         SparePartController::class
+//     )->except(['show']);
+// });
 
 // HOME SERVICE
 Route::middleware('role:1,2')->group(function () {
@@ -518,37 +525,41 @@ Route::middleware('role:1,2')->group(function () {
 });
 
 
- // ORDER SPAREPART
-Route::middleware('role:1,2,9')->group(function () {
-    Route::resource(
-        '/order',
-        OrderSparePartController::class
-    )->except(['show']);
-});
+// [DISABLED - Fitur penjualan sparepart online dihapus]
+// ORDER SPAREPART
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::resource(
+//         '/order',
+//         OrderSparePartController::class
+//     )->except(['show']);
+// });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // ORDER DETAIL
-Route::middleware('role:1,2,9')->group(function () {
-    Route::resource(
-        '/orderdetail',
-        OrderDetailController::class
-    )->except(['show']);
-});
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::resource(
+//         '/orderdetail',
+//         OrderDetailController::class
+//     )->except(['show']);
+// });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // PENGIRIMAN
-Route::middleware('role:1,2,9')->group(function () {
-    Route::resource(
-        '/pengiriman',
-        PengirimanController::class
-    )->except(['show']);
-});
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::resource(
+//         '/pengiriman',
+//         PengirimanController::class
+//     )->except(['show']);
+// });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // EKSPEDISI
-Route::middleware('role:1,2,9')->group(function () {
-    Route::resource(
-        '/ekspedisi',
-        EkspedisiController::class
-    )->except(['show']);
-});
+// Route::middleware('role:1,2,9')->group(function () {
+//     Route::resource(
+//         '/ekspedisi',
+//         EkspedisiController::class
+//     )->except(['show']);
+// });
 
 
 /*
@@ -731,19 +742,21 @@ Route::middleware('role:5')->group(function () {
     )->name('montir-lapangan.tugas.status');
 });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // DASHBOARD PETUGAS SPARE PART
-Route::middleware('role:9')->group(function () {
-    Route::get('/dashboard-petugas-sparepart', function () {
-        return view('dashboard-petugas-sparepart');
-    })->name('dashboard.petugas-sparepart');
-});
+// Route::middleware('role:9')->group(function () {
+//     Route::get('/dashboard-petugas-sparepart', function () {
+//         return view('dashboard-petugas-sparepart');
+//     })->name('dashboard.petugas-sparepart');
+// });
 
+// [DISABLED - Fitur penjualan sparepart online dihapus]
 // DASHBOARD PETUGAS PENGIRIMAN
-Route::middleware('role:10')->group(function () {
-    Route::get('/dashboard-petugas-pengiriman', function () {
-        return view('dashboard-petugas-pengiriman');
-    })->name('dashboard.petugas-pengiriman');
-});
+// Route::middleware('role:10')->group(function () {
+//     Route::get('/dashboard-petugas-pengiriman', function () {
+//         return view('dashboard-petugas-pengiriman');
+//     })->name('dashboard.petugas-pengiriman');
+// });
 
 
 /*
@@ -949,4 +962,32 @@ Route::middleware('role:1,2')->group(function () {
         '/komisi/{id}/bayar',
         [KomisiController::class, 'markDibayar']
     )->name('komisi.bayar');
+});
+
+/*
+|--------------------------------------------------------------------------
+| FEAT: KONFIRMASI PEMBAYARAN — Admin Cabang (role:2)
+|--------------------------------------------------------------------------
+| Admin Cabang dapat melihat daftar pembayaran Booking Servis dan
+| Home Service yang berstatus "menunggu" di cabangnya, lalu
+| meng-ACC (lunas) atau Menolak (gagal).
+*/
+
+use App\Http\Controllers\KonfirmasiPembayaranController;
+
+Route::middleware('role:2')->group(function () {
+    Route::get(
+        '/konfirmasi-pembayaran',
+        [KonfirmasiPembayaranController::class, 'index']
+    )->name('konfirmasi-pembayaran.index');
+
+    Route::post(
+        '/konfirmasi-pembayaran/{id}/acc',
+        [KonfirmasiPembayaranController::class, 'acc']
+    )->name('konfirmasi-pembayaran.acc');
+
+    Route::post(
+        '/konfirmasi-pembayaran/{id}/tolak',
+        [KonfirmasiPembayaranController::class, 'tolak']
+    )->name('konfirmasi-pembayaran.tolak');
 });
